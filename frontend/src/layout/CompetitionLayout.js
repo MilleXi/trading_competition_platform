@@ -131,7 +131,15 @@ const CompetitionLayout = () => {
                 <CandlestickChart data={marketData} />
               </div>
               <div className="report" style={{ flex: "1", padding: '1em' }}>
-                 <FinancialReport selectedStock={selectedStock} />
+                 <FinancialReport selectedStock={selectedStock}
+                  chartWidth="95%"
+                  chartHeight={250}
+                  chartTop={80}
+                  chartLeft={50}
+                  chartRight={10}
+                  titleColor="blue"
+                  backgroundColor="rgba(255, 255, 255, 1)"
+                  chartPaddingLeft={-10} />
               </div>
             </div>
             <div className="bottom-section d-flex justify-content-between">
