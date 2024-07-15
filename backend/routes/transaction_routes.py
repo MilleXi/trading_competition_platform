@@ -2,12 +2,15 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from flask import Blueprint, jsonify, request, current_app
+from flask import Flask, Blueprint, jsonify, request, current_app
+from flask_cors import CORS
 from utils.db_utils import db, Transaction
 from datetime import datetime
 
-transaction_bp = Blueprint('transaction', __name__)
+app = Flask(__name__)
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
+transaction_bp = Blueprint('transaction', __name__)
 
 # 获取所有交易记录
 @transaction_bp.route('/transactions', methods=['GET'])
@@ -38,36 +41,43 @@ def get_transactions():
     } for transaction in transactions]
     return jsonify(transaction_data)
 
-
 # 创建新的交易记录
 @transaction_bp.route('/transactions', methods=['POST'])
 def create_transaction():
     data = request.get_json()
+    try:
+        date = datetime.strptime(data['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+    except ValueError:
+        return jsonify({"error": "Incorrect date format"}), 400
+
     new_transaction = Transaction(
         user_id=data['user_id'],
         stock_symbol=data['stock_symbol'],
         transaction_type=data['transaction_type'],
         amount=data['amount'],
-        date=datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+        date=date
     )
     db.session.add(new_transaction)
     db.session.commit()
     return jsonify({'message': 'Transaction created successfully'}), 201
-
 
 # 更新交易记录
 @transaction_bp.route('/transactions/<int:transaction_id>', methods=['PUT'])
 def update_transaction(transaction_id):
     data = request.get_json()
     transaction = Transaction.query.get_or_404(transaction_id)
+    try:
+        date = datetime.strptime(data['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+    except ValueError:
+        return jsonify({"error": "Incorrect date format"}), 400
+
     transaction.user_id = data['user_id']
     transaction.stock_symbol = data['stock_symbol']
     transaction.transaction_type = data['transaction_type']
     transaction.amount = data['amount']
-    transaction.date = datetime.strptime(data['date'], '%Y-%m-%d %H:%M:%S')
+    transaction.date = date
     db.session.commit()
     return jsonify({'message': 'Transaction updated successfully'})
-
 
 # 删除交易记录
 @transaction_bp.route('/transactions/<int:transaction_id>', methods=['DELETE'])
@@ -76,3 +86,8 @@ def delete_transaction(transaction_id):
     db.session.delete(transaction)
     db.session.commit()
     return jsonify({'message': 'Transaction deleted successfully'})
+
+app.register_blueprint(transaction_bp, url_prefix='/api')
+
+if __name__ == '__main__':
+    app.run(port=5000)
