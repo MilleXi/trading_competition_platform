@@ -1,8 +1,9 @@
 import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from flask import Blueprint, jsonify, current_app, request
-from utils.db_utils import db, StockData
+from flask import Blueprint, jsonify, current_app
+from backend.utils.db_utils import db, StockData
 import yfinance as yf
 import pandas as pd
 
@@ -55,9 +56,10 @@ def download_stock_data():
   with current_app.app_context():
     for stock in STOCKS:
       df = yf.download(stock, start=START_DATE, end=END_DATE)
+      # print(df)
       df.reset_index(inplace=True)
       df = calculate_indicators(df)
-      for i, row in df.iterrows():
+      for _, row in df.iterrows():
         stock_data = StockData(
           symbol=stock,
           date=row['Date'].date(),
@@ -84,43 +86,14 @@ def download_stock_data():
     db.session.commit()
 
 
-# @stock_bp.route('/stored_stock_data', methods=['GET'])
-# def get_stored_stock_data():
-#     stocks = StockData.query.all()
-#     stock_data = [{
-#         'symbol': stock.symbol,
-#         'date': stock.date,
-#         'open': stock.open,
-#         'high': stock.high,
-#         'low': stock.low,
-#         'close': stock.close,
-#         'volume': stock.volume
-#     } for stock in stocks]
-#     return jsonify(stock_data)
+@stock_bp.route('/stock_data', methods=['GET'])
+def get_stock_data():
+  stock_data = download_stock_data()
+  return jsonify(stock_data)
 
 
 @stock_bp.route('/stored_stock_data', methods=['GET'])
 def get_stored_stock_data():
-    symbol = request.args.get('symbol')
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-
-    query = StockData.query
-    if symbol:
-        query = query.filter_by(symbol=symbol)
-    if start_date:
-        query = query.filter(StockData.date >= start_date)
-    if end_date:
-        query = query.filter(StockData.date <= end_date)
-
-    stocks = query.all()
-    stock_data = [{
-        'symbol': stock.symbol,
-        'date': stock.date,
-        'open': stock.open,
-        'high': stock.high,
-        'low': stock.low,
-        'close': stock.close,
-        'volume': stock.volume
-    } for stock in stocks]
-    return jsonify(stock_data)
+  with open(os.path.join(DATA_DIR, 'stock_data.pkl'), 'rb') as f:
+    stock_data = pd.read_pickle(f)
+  return jsonify(stock_data)
