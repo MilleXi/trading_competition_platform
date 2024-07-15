@@ -40,5 +40,5 @@ yarn-error.log*
 /frontend/yarn-error.log*
 
 /backend/__pycache__
-/backend/route/__pycache__
+/backend/routes/__pycache__
 /backend/utils/__pycache__
