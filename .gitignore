@@ -1,0 +1,41 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/frontend/node_modules
+package-lock.json
+/frontend/package-lock.json
+yarn.lock
+/frontend/yarn.lock
+
+# testing
+/coverage
+/frontend/coverage
+
+# production
+/build
+/frontend/build
+
+# misc
+.eslintcache
+/frontend/.eslintcache
+.DS_Store
+/frontend/.DS_Store
+.idea
+/frontend/.idea
+.env.local
+/frontend/.env.local
+.env.development.local
+/frontend/.env.development.local
+.env.test.local
+/frontend/.env.test.local
+.env.production.local
+/frontend/.env.production.local
+
+npm-debug.log*
+/frontend/npm-debug.log*
+yarn-debug.log*
+/frontend/yarn-debug.log*
+yarn-error.log*
+/frontend/yarn-error.log*
+

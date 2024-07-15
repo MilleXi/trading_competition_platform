@@ -1,0 +1,7 @@
+pandas
+Flask
+Flask-SQLAlchemy
+Flask-CORS
+yfinance
+joblib
+scikit-learn

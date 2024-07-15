@@ -1,0 +1,184 @@
+/* .background {
+  background-color: #333333;
+  height: 100vh;
+  z-index: 1;
+} */
+
+.background {
+  background-image: url('/src/assets/images/background1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  height: auto;
+  z-index: 1;
+}
+
+:root {
+  --frame-color: rgba(59, 67, 71, 0.8);
+}
+
+/* K线图 */
+.chart {
+  width: 100%; /* 或者其他适合的宽度 */
+  height: 400px; /* 或者其他适合的高度 */
+  background-image: url('/src/assets/images/k-line.png');
+  background-size: cover; /* 根据需要调整背景图像的大小 */
+  background-position: center; /* 根据需要调整背景图像的位置 */
+  background-repeat: no-repeat; /* 防止背景图像重复 */
+}
+
+/* 财务报表等数据图 */
+.report {
+  width: 100%; /* 或者其他适合的宽度 */
+  height: 400px; /* 或者其他适合的高度 */
+  background-image: url('/src/assets/images/finance.png');
+  background-size: cover; /* 根据需要调整背景图像的大小 */
+  background-position: center; /* 根据需要调整背景图像的位置 */
+  background-repeat: no-repeat; /* 防止背景图像重复 */
+}
+
+
+.app {
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: var(--frame-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.stock-switcher {
+  margin-top: 20px;
+}
+
+.stock-switcher button {
+  margin: 0 5px;
+}
+
+.market-display {
+  display: flex;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.stock-info {
+  width: 45%;
+  padding: 10px;
+}
+
+.report {
+  width: 45%;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.bottom-section {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.decision-area {
+  padding: 20px;
+  width: 48%;
+}
+
+.stock-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.stock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  margin: 10px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.stock-name {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.trade-options {
+  display: flex;
+  flex-direction: column;
+}
+
+.trade-options > div {
+  margin-bottom: 10px;
+}
+
+.clear-button,
+.submit-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+.submit-button.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.submit-button.active {
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+}
+
+.ranking {
+  width: 48%;
+  padding: 10px;
+  background-color: var(--frame-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.ranking table {
+  width: 100%;
+}
+
+.history-section {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.history-section select {
+  margin-bottom: 10px;
+}
+
+.history-records {
+  display: flex;
+  justify-content: space-between;
+}
+
+.history-records div {
+  width: 48%;
+  
+}
+
+.history-records table {
+  width: 100%;
+}

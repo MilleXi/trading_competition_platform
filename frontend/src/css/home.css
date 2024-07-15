@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+
+body {
+  font-family: 'Montserrat', sans-serif; /* 应用Montserrat字体 */
+}
+
+.background {
+  background-image: url('/src/assets/images/background1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  height: auto;
+  z-index: 1;
+}
+
+/* .background {
+  background-color: #333333;
+  height: 100vh;
+  z-index: 1;
+} */
+
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: fit-content;
+}
+
+.AppHeader {
+  position: sticky;
+  top: 0;
+  background-color: transparent !important;
+  color: white;
+  z-index: 1000;
+  width: 100%;
+}
+
+.game-logo {
+  width: 15%;
+  margin-top: 1%;
+}
+
+/* 项目标题和简介的样式 */
+.game-intro {
+  margin-top: 16px;
+}
+
+.game-title {
+  font-size: 4rem;
+  font-weight: bold;
+  color: white;
+}
+
+.game-description {
+  font-size: 1.5rem;
+  color: white;
+  margin-top: 1em;
+  max-width: 1200px;
+}
+
+/* 按钮和顶端距离 */
+.game-buttons {
+  margin-top: 16px;
+}
+
+.start-game-button,
+.difficulty-button {
+  font-size: 1.7rem; /* 按钮（包括字体）大小 */
+  padding: 10px 30px; /* 调整按钮内边距（高度，宽度） */
+  margin: 16px 40px; /* 调整按钮距离 */
+  width: 180px; /* 设置固定宽度 */
+  font-family: 'Montserrat', sans-serif;
+  text-align: center; /* 文字居中 */
+}
+
+.difficulty-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.difficulty-options .btn {
+  width: 100%; /* 按钮宽度 */
+  max-width: 200px; /* 最大宽度 */
+  margin: 10px;
+}
+
+.custom-modal .modal-dialog {
+  top: 35%; /* 向下移动难度框 */
+  transform: translateY(-50%);
+}
