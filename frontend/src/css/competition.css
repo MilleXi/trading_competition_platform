@@ -30,14 +30,7 @@
 }
 
 /* 财务报表等数据图 */
-.report {
-  width: 100%; /* 或者其他适合的宽度 */
-  height: 400px; /* 或者其他适合的高度 */
-  background-image: url('/src/assets/images/finance.png');
-  background-size: cover; /* 根据需要调整背景图像的大小 */
-  background-position: center; /* 根据需要调整背景图像的位置 */
-  background-repeat: no-repeat; /* 防止背景图像重复 */
-}
+
 
 
 .app {
@@ -176,7 +169,7 @@
 
 .history-records div {
   width: 48%;
-  
+
 }
 
 .history-records table {

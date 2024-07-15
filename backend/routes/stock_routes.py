@@ -2,8 +2,8 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from flask import Blueprint, jsonify, current_app
-from backend.utils.db_utils import db, StockData
+from flask import Blueprint, jsonify, current_app, request
+from utils.db_utils import db, StockData
 import yfinance as yf
 import pandas as pd
 
@@ -86,14 +86,55 @@ def download_stock_data():
     db.session.commit()
 
 
-@stock_bp.route('/stock_data', methods=['GET'])
-def get_stock_data():
-  stock_data = download_stock_data()
-  return jsonify(stock_data)
-
-
 @stock_bp.route('/stored_stock_data', methods=['GET'])
 def get_stored_stock_data():
-  with open(os.path.join(DATA_DIR, 'stock_data.pkl'), 'rb') as f:
-    stock_data = pd.read_pickle(f)
-  return jsonify(stock_data)
+    symbol = request.args.get('symbol')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    print(f"Received request with params - symbol: {symbol}, start_date: {start_date}, end_date: {end_date}")
+
+    query = StockData.query
+    if symbol:
+        print(f"Filtering by symbol: {symbol}")
+        query = query.filter_by(symbol=symbol)
+    if start_date:
+        print(f"Filtering by start_date: {start_date}")
+        query = query.filter(StockData.date >= start_date)
+    if end_date:
+        print(f"Filtering by end_date: {end_date}")
+        query = query.filter(StockData.date <= end_date)
+
+    stocks = query.all()
+    print("query:", query)
+
+    print("Query result:", stocks)
+
+    stock_data = [{
+        'symbol': stock.symbol,
+        'date': stock.date,
+        'open': stock.open,
+        'high': stock.high,
+        'low': stock.low,
+        'close': stock.close,
+        'volume': stock.volume,
+        'ma5': stock.ma5,
+        'ma10': stock.ma10,
+        'ma20': stock.ma20,
+        'rsi': stock.rsi,
+        'macd': stock.macd,
+        'vwap': stock.vwap,
+        'sma': stock.sma,
+        'std_dev': stock.std_dev,
+        'upper_band': stock.upper_band,
+        'lower_band': stock.lower_band,
+        'atr': stock.atr,
+        'sharpe_ratio': stock.sharpe_ratio,
+        'beta': stock.beta
+    } for stock in stocks]
+
+    print("Returned data:", stock_data)
+
+    return jsonify(stock_data)
+
+

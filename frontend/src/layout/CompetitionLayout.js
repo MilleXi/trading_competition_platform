@@ -6,12 +6,13 @@ import { AppHeader, AppFooter, AppHeaderDropdown } from '../components/index';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle } from '@coreui/react';
 import CandlestickChart from '../components/competition/CandlestickChart';
 import StockTradeComponent from '../components/competition/StockTrade';
+import FinancialReport from '../components/competition/FinancialReport';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
   const [marketData, setMarketData] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
-  const [selectedStock, setSelectedStock] = useState('stock1');
+  const [selectedStock, setSelectedStock] = useState('AAPL');
   const [buyAmount, setBuyAmount] = useState('');
   const [sellAmount, setSellAmount] = useState('');
   const [hold, setHold] = useState(false);
@@ -47,7 +48,7 @@ const CompetitionLayout = () => {
     return () => clearTimeout(timerId);
   }, [counter, gameEnd]);
 
-  const stockList = ['stock1', 'stock2', 'stock3'];
+  const stockList = ['AAPL', 'GOOGL', 'AMZN'];
 
   const handleBuySellChange = (stock, type, amount) => {
     setSelectedTrades((prevTrades) => ({
@@ -121,16 +122,16 @@ const CompetitionLayout = () => {
           </div>
           <div className="body flex-grow-1 px-3 d-flex flex-column align-items-center">
             <div className="stock-switcher">
-              <button onClick={() => setSelectedStock('stock1')}>Stock 1</button>
-              <button onClick={() => setSelectedStock('stock2')}>Stock 2</button>
-              <button onClick={() => setSelectedStock('stock3')}>Stock 3</button>
+              <button onClick={() => setSelectedStock('AAPL')}>AAPL</button>
+              <button onClick={() => setSelectedStock('GOOGL')}>GOOGL</button>
+              <button onClick={() => setSelectedStock('AMZN')}>AMZN</button>
             </div>
             <div className="market-display d-flex">
               <div className="stock-info" style={{ backgroundColor: 'white', flex: '1', padding: '1em', color: 'black' }}>
                 <CandlestickChart data={marketData} />
               </div>
               <div className="report" style={{ flex: "1", padding: '1em' }}>
-                {/* 财务报表 */}
+                 <FinancialReport selectedStock={selectedStock} />
               </div>
             </div>
             <div className="bottom-section d-flex justify-content-between">
