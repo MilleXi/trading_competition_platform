@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const StockTradeComponent = ({ initialBalance }) => {
+const StockTradeComponent = ({ initialBalance, userId }) => {
   const [selectedTrades, setSelectedTrades] = useState({
     stock1: { type: 'hold', amount: '' },
     stock2: { type: 'hold', amount: '' },
@@ -27,12 +27,41 @@ const StockTradeComponent = ({ initialBalance }) => {
   };
 
   const handleClear = () => {
-    setSelectedTrades({});
+    setSelectedTrades({
+      stock1: { type: 'hold', amount: '' },
+      stock2: { type: 'hold', amount: '' },
+      stock3: { type: 'hold', amount: '' }
+    });
   };
 
   const handleSubmit = () => {
-    // 提交逻辑，例如更新余额和股票状态
     console.log('Submitted trades:', selectedTrades);
+
+    const transactions = Object.keys(selectedTrades).map(stock => ({
+      user_id: userId,
+      stock_symbol: stock,
+      transaction_type: selectedTrades[stock].type,
+      amount: parseInt(selectedTrades[stock].amount) || 0,
+      date: new Date().toISOString()  // 当前时间
+    }));
+
+
+    transactions.forEach(transaction => {
+      fetch('http://localhost:5000/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(transaction)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Transaction created:', data);
+      })
+      .catch(error => {
+        console.error('Error creating transaction:', error);
+      });
+    });
   };
 
   return (
@@ -42,7 +71,7 @@ const StockTradeComponent = ({ initialBalance }) => {
 
       <div className="stock-container">
         {['stock1', 'stock2', 'stock3'].map((stock) => (
-          <div key={stock} className="stock-item" style={{flex: '1'}}>
+          <div key={stock} className="stock-item" style={{ flex: '1' }}>
             <div className="stock-name">{stock}</div>
             <div className="trade-options">
               <div>
@@ -59,7 +88,7 @@ const StockTradeComponent = ({ initialBalance }) => {
                     type="number"
                     value={selectedTrades[stock]?.amount || ''}
                     onChange={(e) => handleBuySellChange(stock, 'buy', e.target.value)}
-                    style={{minWidth: '0', width: '90%'}}
+                    style={{ minWidth: '0', width: '90%' }}
                     min={0}
                     step={1}
                     onInput={(e) => e.target.value = Math.floor(e.target.value)}
@@ -80,7 +109,7 @@ const StockTradeComponent = ({ initialBalance }) => {
                     type="number"
                     value={selectedTrades[stock]?.amount || ''}
                     onChange={(e) => handleBuySellChange(stock, 'sell', e.target.value)}
-                    style={{minWidth: '0', width: '90%'}}
+                    style={{ minWidth: '0', width: '90%' }}
                     min={0}
                     step={1}
                     onInput={(e) => e.target.value = Math.floor(e.target.value)}

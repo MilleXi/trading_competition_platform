@@ -19,6 +19,7 @@ const CompetitionLayout = () => {
   const MaxRound = 10;
   const [counter, setCounter] = useState(TMinus);
   const [gameEnd, setGameEnd] = useState(false);
+  const userId = 1;
 
   const location = useLocation();
   const { difficulty } = location.state || { difficulty: 'Easy' };
@@ -133,7 +134,7 @@ const CompetitionLayout = () => {
               </div>
             </div>
             <div className="bottom-section d-flex justify-content-between">
-              <StockTradeComponent initialBalance={initialBalance} />
+              <StockTradeComponent initialBalance={initialBalance} userId={userId}/>
               <div className="ranking">
                 <h3>Standings:</h3>
                 <table>
