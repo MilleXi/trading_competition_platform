@@ -4,8 +4,6 @@ from datetime import datetime
 db = SQLAlchemy()
 
 
-
-
 class StockData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     symbol = db.Column(db.String(10), nullable=False)

@@ -19,7 +19,6 @@ def get_transactions():
     stock_symbol = request.args.get('stock_symbol')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-
     query = Transaction.query
     if user_id:
         query = query.filter_by(user_id=user_id)
