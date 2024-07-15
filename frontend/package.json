@@ -28,6 +28,7 @@
     "@coreui/utils": "^2.0.2",
     "@popperjs/core": "^2.11.8",
     "apexcharts": "^3.50.0",
+    "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "classnames": "^2.5.1",
     "core-js": "^3.37.1",

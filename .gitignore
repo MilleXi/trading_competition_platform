@@ -39,3 +39,6 @@ yarn-debug.log*
 yarn-error.log*
 /frontend/yarn-error.log*
 
+/backend/__pycache__
+/backend/route/__pycache__
+/backend/utils/__pycache__
