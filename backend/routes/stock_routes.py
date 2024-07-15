@@ -113,28 +113,27 @@ def get_stored_stock_data():
     stock_data = [{
         'symbol': stock.symbol,
         'date': stock.date,
-        'open': stock.open,
-        'high': stock.high,
-        'low': stock.low,
-        'close': stock.close,
+        'open': round(stock.open, 2),
+        'high': round(stock.high, 2),
+        'low': round(stock.low, 2),
+        'close': round(stock.close, 2),
         'volume': stock.volume,
-        'ma5': stock.ma5,
-        'ma10': stock.ma10,
-        'ma20': stock.ma20,
-        'rsi': stock.rsi,
-        'macd': stock.macd,
-        'vwap': stock.vwap,
-        'sma': stock.sma,
-        'std_dev': stock.std_dev,
-        'upper_band': stock.upper_band,
-        'lower_band': stock.lower_band,
-        'atr': stock.atr,
-        'sharpe_ratio': stock.sharpe_ratio,
-        'beta': stock.beta
+        'ma5': round(stock.ma5, 2),
+        'ma10': round(stock.ma10, 2),
+        'ma20': round(stock.ma20, 2),
+        'rsi': round(stock.rsi, 2),
+        'macd': round(stock.macd, 2),
+        'vwap': round(stock.vwap, 2),
+        'sma': round(stock.sma, 2),
+        'std_dev': round(stock.std_dev, 2),
+        'upper_band': round(stock.upper_band, 2),
+        'lower_band': round(stock.lower_band, 2),
+        'atr': round(stock.atr, 2),
+        'sharpe_ratio': round(stock.sharpe_ratio, 2),
+        'beta': round(stock.beta, 2)
     } for stock in stocks]
 
     print("Returned data:", stock_data)
 
     return jsonify(stock_data)
-
 
