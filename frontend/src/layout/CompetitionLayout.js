@@ -126,12 +126,14 @@ const CompetitionLayout = () => {
               <button onClick={() => setSelectedStock('GOOGL')}>GOOGL</button>
               <button onClick={() => setSelectedStock('AMZN')}>AMZN</button>
             </div>
-            <div className="market-display d-flex">
-              <div className="stock-info" style={{ backgroundColor: 'white', flex: '1', padding: '1em', color: 'black' }}>
-                <CandlestickChart data={marketData} />
+            <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
+              <div className="stock-info" style={{ backgroundColor: 'transparent', flex: '1', padding: '1em' }}>
+                <div style={{ backgroundColor: 'white', color: 'black' }}>
+                  <CandlestickChart data={marketData} />
+                </div>
               </div>
               <div className="report" style={{ flex: "1", padding: '1em' }}>
-                 <FinancialReport selectedStock={selectedStock}
+                <FinancialReport selectedStock={selectedStock}
                   chartWidth="95%"
                   chartHeight={250}
                   chartTop={80}
@@ -147,7 +149,7 @@ const CompetitionLayout = () => {
               </div>
             </div>
             <div className="bottom-section d-flex justify-content-between">
-              <StockTradeComponent initialBalance={initialBalance} userId={userId}/>
+              <StockTradeComponent initialBalance={initialBalance} userId={userId} />
               <div className="ranking">
                 <h3>Standings:</h3>
                 <table>
