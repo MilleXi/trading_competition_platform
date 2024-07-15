@@ -9,22 +9,21 @@ import json
 
 
 def create_app():
-  app = Flask(__name__)
-  CORS(app)
+    app = Flask(__name__)
+    CORS(app, supports_credentials=True)
+    # 配置数据库
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../instance/db.sqlite3'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-  # 配置数据库
-  app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../instance/db.sqlite3'
-  app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # 初始化数据库
+    init_db(app)
 
-  # 初始化数据库
-  init_db(app)
+    # 注册蓝图
+    app.register_blueprint(stock_bp, url_prefix='/api')
+    app.register_blueprint(transaction_bp, url_prefix='/api')
+    app.register_blueprint(game_bp, url_prefix='/api')
 
-  # 注册蓝图
-  app.register_blueprint(stock_bp, url_prefix='/api')
-  app.register_blueprint(transaction_bp, url_prefix='/api')
-  app.register_blueprint(game_bp, url_prefix='/api')
-
-  return app
+    return app
 
 
 # 确保数据目录存在
