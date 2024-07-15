@@ -8,7 +8,7 @@ import CandlestickChart from '../components/competition/CandlestickChart';
 import StockTradeComponent from '../components/competition/StockTrade';
 
 const CompetitionLayout = () => {
-  const initialBalance = 1000000;
+  const initialBalance = 100000;
   const [marketData, setMarketData] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [selectedStock, setSelectedStock] = useState('stock1');
