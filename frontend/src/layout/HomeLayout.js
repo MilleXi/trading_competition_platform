@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/home.css';
-import { 
+import {
   AppBreadcrumb,
   AppContent,
   AppFooter,
@@ -36,7 +36,7 @@ const HomeLayout = () => {
   };
 
   return (
-    <div className="background"> 
+    <div className="background">
       <div className="app">
         <div className="wrapper d-flex flex-column min-vh-100" style={{ color: 'white' }}>
           <AppHeader />

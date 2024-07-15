@@ -135,11 +135,15 @@ const CompetitionLayout = () => {
                   chartWidth="95%"
                   chartHeight={250}
                   chartTop={80}
-                  chartLeft={50}
+                  chartLeft={0}
                   chartRight={10}
                   titleColor="blue"
                   backgroundColor="rgba(255, 255, 255, 1)"
-                  chartPaddingLeft={-10} />
+                  chartPaddingLeft={-20}
+                  rowGap={20}
+                  colGap={5}
+                  chartContainerHeight={300}
+                  rowsPerPage={6} />
               </div>
             </div>
             <div className="bottom-section d-flex justify-content-between">
