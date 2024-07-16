@@ -4,7 +4,6 @@ import '../../css/TradeHistory.css';  // 导入CSS文件
 
 const TradeHistory = ({ userId, refreshHistory, selectedStock }) => {
   const [history, setHistory] = useState([]);
-  console.log(11111)
   useEffect(() => {
     const fetchHistory = async () => {
       try {
