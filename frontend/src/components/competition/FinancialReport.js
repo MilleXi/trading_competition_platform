@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 
 const FinancialReport = ({
   selectedStock,
+  stockData,
   chartWidth = '100%',
   chartHeight = 300,
   chartTop = 50,
@@ -19,28 +19,8 @@ const FinancialReport = ({
   chartContainerHeight = 600, // height of the chart container
   rowsPerPage = 5 // number of rows to display per page
 }) => {
-  const [stockData, setStockData] = useState([]);
   const [selectedAttribute, setSelectedAttribute] = useState(null);
   const [showChart, setShowChart] = useState(false);
-
-  useEffect(() => {
-    const fetchStockData = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/stored_stock_data', {
-          params: {
-            symbol: selectedStock,
-            start_date: '2021-01-01',
-            end_date: '2024-01-01'
-          }
-        });
-        setStockData(response.data);
-      } catch (error) {
-        console.error('Error fetching stock data:', error);
-      }
-    };
-
-    fetchStockData();
-  }, [selectedStock]);
 
   const handleAttributeClick = (attribute) => {
     if (attribute === 'Date') return;

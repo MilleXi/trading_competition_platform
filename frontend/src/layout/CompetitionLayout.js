@@ -7,11 +7,12 @@ import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle } from '@coreu
 import CandlestickChart from '../components/competition/CandlestickChart';
 import StockTradeComponent from '../components/competition/StockTrade';
 import FinancialReport from '../components/competition/FinancialReport';
+import axios from 'axios';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
-  const [marketData, setMarketData] = useState([]);
-  const [currentRound, setCurrentRound] = useState(1);
+  const [stockData, setStockData] = useState([]);
+  const [currentRound, setCurrentRound] = useState(10);
   const [selectedStock, setSelectedStock] = useState('AAPL');
   const [buyAmount, setBuyAmount] = useState('');
   const [sellAmount, setSellAmount] = useState('');
@@ -21,18 +22,36 @@ const CompetitionLayout = () => {
   const [counter, setCounter] = useState(TMinus);
   const [gameEnd, setGameEnd] = useState(false);
   const userId = 1;
-
+  const [CandlestickChartData, setCandlestickChartData] = useState([]);
   const location = useLocation();
   const { difficulty } = location.state || { difficulty: 'Easy' };
 
   useEffect(() => {
-    // Fetch market data here, for now we use mock data
-    setMarketData([
-      { symbol: 'AAPL', price: 150 },
-      { symbol: 'GOOGL', price: 2800 },
-      { symbol: 'AMZN', price: 3500 },
-    ]);
-  }, []);
+    const fetchStockData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/stored_stock_data', {
+          params: {
+            symbol: selectedStock,
+            start_date: '2021-01-01',
+            end_date: '2024-01-01'
+          }
+        });
+        setStockData(response.data);
+        setCandlestickChartData(response.data.map(data => ({
+          x: new Date(data.date),
+          y: [data.open, data.high, data.low, data.close]
+        })));
+      } catch (error) {
+        console.error('Error fetching stock data:', error);
+      }
+    };
+
+    fetchStockData();
+  }, [selectedStock]);
+
+  // console.log('stockData:', stockData);
+  // console.log('selectedStock:', selectedStock);
+  // console.log('CandlestickChartData:', CandlestickChartData);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -129,11 +148,12 @@ const CompetitionLayout = () => {
             <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
               <div className="stock-info" style={{ backgroundColor: 'transparent', flex: '1', padding: '1em' }}>
                 <div style={{ backgroundColor: 'white', color: 'black' }}>
-                  <CandlestickChart data={marketData} />
+                  <CandlestickChart data={CandlestickChartData} stockName={selectedStock}/>
                 </div>
               </div>
               <div className="report" style={{ flex: "1", padding: '1em' }}>
                 <FinancialReport selectedStock={selectedStock}
+                  stockData={stockData}
                   chartWidth="95%"
                   chartHeight={250}
                   chartTop={80}
@@ -251,7 +271,6 @@ const CompetitionLayout = () => {
             </div>
           </div>
         </div>
-        <AppFooter />
       </div>
     </div>
   );
