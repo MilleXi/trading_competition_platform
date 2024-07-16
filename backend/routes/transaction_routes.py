@@ -12,6 +12,7 @@ CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://l
 
 transaction_bp = Blueprint('transaction', __name__)
 
+
 # 获取所有交易记录
 @transaction_bp.route('/transactions', methods=['GET'])
 def get_transactions():
@@ -60,6 +61,7 @@ def create_transaction():
     db.session.commit()
     return jsonify({'message': 'Transaction created successfully'}), 201
 
+
 # 更新交易记录
 @transaction_bp.route('/transactions/<int:transaction_id>', methods=['PUT'])
 def update_transaction(transaction_id):
@@ -77,6 +79,7 @@ def update_transaction(transaction_id):
     transaction.date = date
     db.session.commit()
     return jsonify({'message': 'Transaction updated successfully'})
+
 
 # 删除交易记录
 @transaction_bp.route('/transactions/<int:transaction_id>', methods=['DELETE'])

@@ -39,6 +39,7 @@ class Transaction(db.Model):
 
 class GameInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     balance = db.Column(db.Float, nullable=False)
     score = db.Column(db.Integer, nullable=False)
