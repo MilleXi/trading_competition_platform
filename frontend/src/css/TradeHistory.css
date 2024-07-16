@@ -1,0 +1,9 @@
+/* TradeHistory.css */
+.history-section table {
+  width: 100%;
+  min-height: 200px; /* 设置最小高度 */
+}
+.history-section th, .history-section td {
+  padding: 10px;
+  text-align: center;
+}
