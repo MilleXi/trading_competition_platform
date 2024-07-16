@@ -10,13 +10,16 @@ import CandlestickChart from '../components/competition/CandlestickChart';
 import StockTradeComponent from '../components/competition/StockTrade';
 import FinancialReport from '../components/competition/FinancialReport';
 import TradeHistory from '../components/competition/TradeHistory';
-import axios from 'axios';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
+  const startDate = new Date('2022-01-01');
   const [marketData, setMarketData] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
+  const [currentDate, setCurrentDate] = useState(startDate);
   const [selectedStock, setSelectedStock] = useState('AAPL');
+  const [selectedStockList, setSelectedStockList] = useState(['AAPL', 'MSFT', 'GOOGL']);
+  const [stockData, setStockData] = useState([]);
   const [buyAmount, setBuyAmount] = useState('');
   const [sellAmount, setSellAmount] = useState('');
   const [hold, setHold] = useState(false);
@@ -56,9 +59,9 @@ const CompetitionLayout = () => {
     fetchStockData();
   }, [selectedStock]);
 
-  // console.log('stockData:', stockData);
-  // console.log('selectedStock:', selectedStock);
-  // console.log('CandlestickChartData:', CandlestickChartData);
+  console.log('stockData:', stockData);
+  console.log('selectedStock:', selectedStock);
+  console.log('CandlestickChartData:', CandlestickChartData);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -102,8 +105,8 @@ const CompetitionLayout = () => {
 
   const confirmSelection = () => {
     if (selectedTickers.length === 3) {
-      setSelectedStock(selectedTickers);
-      setCurrentStock(selectedTickers[0]); // 默认选择第一个股票
+      setSelectedStockList(selectedTickers);
+      setSelectedStock(selectedTickers[0]); // 默认选择第一个股票
       closeModal();
     }
   };
@@ -203,8 +206,8 @@ const CompetitionLayout = () => {
           </div>
           <div className="body flex-grow-1 px-3 d-flex flex-column align-items-center">
             <div className="stock-switcher">
-              {selectedStock.map((stock) => (
-                <button key={stock} onClick={() => setCurrentStock(stock)}>{stock}</button>
+              {selectedStockList.map((stock) => (
+                <button key={stock} onClick={() => setSelectedStock(stock)}>{stock}</button>
               ))}
             </div>
             <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
@@ -217,6 +220,7 @@ const CompetitionLayout = () => {
                 <FinancialReport selectedStock={selectedStock}
                   currentDate={currentDate}
                   stockData={stockData}
+                  setStockData={setStockData}
                   chartWidth="95%"
                   chartHeight={250}
                   chartTop={80}
@@ -232,7 +236,7 @@ const CompetitionLayout = () => {
               </div>
             </div>
             <div className="bottom-section d-flex justify-content-between">
-              <StockTradeComponent initialBalance={initialBalance} userId={userId} selectedStock={selectedStock} />
+              <StockTradeComponent initialBalance={initialBalance} userId={userId} selectedStock={selectedStockList} />
               <div className="ranking">
                 <h3>Standings:</h3>
                 <table>
@@ -263,7 +267,7 @@ const CompetitionLayout = () => {
                 <option value="1">1</option>
                 {/* Other options */}
               </select>
-              <TradeHistory userId={userId} refreshHistory={refreshHistory} selectedStock={selectedStock} />            </div>
+              <TradeHistory userId={userId} refreshHistory={refreshHistory} selectedStock={selectedStockList} />            </div>
           </div>
         </div>
       </div>
