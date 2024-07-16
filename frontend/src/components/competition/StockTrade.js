@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 
-const StockTradeComponent = ({ initialBalance, userId }) => {
-  const [selectedTrades, setSelectedTrades] = useState({
-    stock1: { type: 'hold', amount: '' },
-    stock2: { type: 'hold', amount: '' },
-    stock3: { type: 'hold', amount: '' }
-  });
+const StockTradeComponent = ({ initialBalance, userId, selectedStock, onSubmit }) => {
+  const [selectedTrades, setSelectedTrades] = useState({});
   const [balance, setBalance] = useState(initialBalance);
   const [remainingBalance, setRemainingBalance] = useState(initialBalance);
   const [gameEnd, setGameEnd] = useState(false);
 
-  console.log('selectedTrades:', selectedTrades);
+  React.useEffect(() => {
+    // 初始化默认选择为hold
+    const initialTrades = {};
+    selectedStock.forEach(stock => {
+      initialTrades[stock] = { type: 'hold', amount: '' };
+    });
+    setSelectedTrades(initialTrades);
+  }, [selectedStock]);
 
   const handleBuySellChange = (stock, type, amount) => {
     setSelectedTrades((prevTrades) => ({
@@ -27,40 +30,36 @@ const StockTradeComponent = ({ initialBalance, userId }) => {
   };
 
   const handleClear = () => {
-    setSelectedTrades({
-      stock1: { type: 'hold', amount: '' },
-      stock2: { type: 'hold', amount: '' },
-      stock3: { type: 'hold', amount: '' }
+    const clearedTrades = {};
+    selectedStock.forEach(stock => {
+      clearedTrades[stock] = { type: 'hold', amount: '' };
     });
+    setSelectedTrades(clearedTrades);
   };
 
   const handleSubmit = () => {
     console.log('Submitted trades:', selectedTrades);
 
-    const transactions = Object.keys(selectedTrades).map(stock => ({
+    const transaction = {
       user_id: userId,
-      stock_symbol: stock,
-      transaction_type: selectedTrades[stock].type,
-      amount: parseInt(selectedTrades[stock].amount) || 0,
+      trades: selectedTrades,
       date: new Date().toISOString()  // 当前时间
-    }));
+    };
 
-
-    transactions.forEach(transaction => {
-      fetch('http://localhost:5000/api/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(transaction)
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Transaction created:', data);
-      })
-      .catch(error => {
-        console.error('Error creating transaction:', error);
-      });
+    fetch('http://localhost:5000/api/transactions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(transaction)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Transaction created:', data);
+      onSubmit(); // 调用父组件的onSubmit来触发刷新
+    })
+    .catch(error => {
+      console.error('Error creating transaction:', error);
     });
   };
 
@@ -70,7 +69,7 @@ const StockTradeComponent = ({ initialBalance, userId }) => {
       <div>Balance: {remainingBalance}</div>
 
       <div className="stock-container">
-        {['stock1', 'stock2', 'stock3'].map((stock) => (
+        {selectedStock.map((stock) => (
           <div key={stock} className="stock-item" style={{ flex: '1' }}>
             <div className="stock-name">{stock}</div>
             <div className="trade-options">

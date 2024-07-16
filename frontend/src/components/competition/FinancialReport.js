@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const FinancialReport = ({
   selectedStock,
+  currentDate,
   chartWidth = '100%',
   chartHeight = 300,
   chartTop = 50,
@@ -30,10 +31,10 @@ const FinancialReport = ({
           params: {
             symbol: selectedStock,
             start_date: '2021-01-01',
-            end_date: '2024-01-01'
+            end_date: currentDate.toISOString().split('T')[0]
           }
         });
-        setStockData(response.data);
+        setStockData(response.data.reverse());
       } catch (error) {
         console.error('Error fetching stock data:', error);
       }
@@ -116,8 +117,8 @@ const FinancialReport = ({
             </table>
           </div>
         </div>
-        <div style={{ paddingTop: '0.5em' }}>
-          <div style={{ overflowY: 'auto', maxHeight: rowsPerPage * 30 + 'px' }}>
+        <div style={{ paddingTop: '0.5em', maxHeight: '300px' }}>
+          <div style={{ overflowY: 'auto', maxHeight: '300px' }}>
             <table style={{ borderCollapse: 'separate', borderSpacing: `${rowGap}px ${colGap}px` }}>
               <thead>
                 <tr>

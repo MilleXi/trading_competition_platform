@@ -46,7 +46,7 @@ const HomeLayout = () => {
             <GameButtons onStartClick={startGame} onDifficultyClick={() => setDifficultyModalVisible(true)} difficulty={difficulty} />
           </div>
         </div>
-        <AppFooter />
+//        <AppFooter />
       </div>
       <DifficultyModal visible={difficultyModalVisible} onClose={() => setDifficultyModalVisible(false)} onDifficultyClick={handleDifficultyClick} />
     </div>
