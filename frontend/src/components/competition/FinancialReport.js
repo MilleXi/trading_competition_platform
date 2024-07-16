@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const FinancialReport = ({
   selectedStock,
+  currentDate,
   stockData,
   chartWidth = '100%',
   chartHeight = 300,
@@ -21,6 +22,25 @@ const FinancialReport = ({
 }) => {
   const [selectedAttribute, setSelectedAttribute] = useState(null);
   const [showChart, setShowChart] = useState(false);
+
+  useEffect(() => {
+    const fetchStockData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/stored_stock_data', {
+          params: {
+            symbol: selectedStock,
+            start_date: '2021-01-01',
+            end_date: currentDate.toISOString().split('T')[0]
+          }
+        });
+        setStockData(response.data.reverse());
+      } catch (error) {
+        console.error('Error fetching stock data:', error);
+      }
+    };
+
+    fetchStockData();
+  }, [selectedStock]);
 
   const handleAttributeClick = (attribute) => {
     if (attribute === 'Date') return;
@@ -96,8 +116,8 @@ const FinancialReport = ({
             </table>
           </div>
         </div>
-        <div style={{ paddingTop: '0.5em' }}>
-          <div style={{ overflowY: 'auto', maxHeight: rowsPerPage * 30 + 'px' }}>
+        <div style={{ paddingTop: '0.5em', maxHeight: '300px' }}>
+          <div style={{ overflowY: 'auto', maxHeight: '300px' }}>
             <table style={{ borderCollapse: 'separate', borderSpacing: `${rowGap}px ${colGap}px` }}>
               <thead>
                 <tr>

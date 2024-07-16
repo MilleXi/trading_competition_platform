@@ -87,10 +87,12 @@ def get_stock_data(ticker):
 # 获取所有股票数据
 stock_data = {ticker: get_stock_data(ticker) for ticker in tickers}
 
+
 def format_feature(data):
     features = ['Volume', 'Year', 'Month', 'Day', 'MA5', 'MA10', 'MA20', 'RSI', 'MACD'\
                 , 'VWAP', 'SMA', 'Std_dev', 'Upper_band', 'Lower_band', 'Relative_Performance', 'ATR',\
                 'Close_yes', 'Open_yes', 'High_yes', 'Low_yes']
+    features = []
     X = data[features]
     y = data['Close'].pct_change()
     # y = (data['Close'] - data['Open'])

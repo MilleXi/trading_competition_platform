@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import Modal from 'react-modal';
 import '../css/home.css';
 import '../css/competition.css';
 import { AppHeader, AppFooter, AppHeaderDropdown } from '../components/index';
@@ -7,20 +9,25 @@ import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle } from '@coreu
 import CandlestickChart from '../components/competition/CandlestickChart';
 import StockTradeComponent from '../components/competition/StockTrade';
 import FinancialReport from '../components/competition/FinancialReport';
+import TradeHistory from '../components/competition/TradeHistory';
 import axios from 'axios';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
-  const [stockData, setStockData] = useState([]);
-  const [currentRound, setCurrentRound] = useState(10);
+  const [marketData, setMarketData] = useState([]);
+  const [currentRound, setCurrentRound] = useState(1);
   const [selectedStock, setSelectedStock] = useState('AAPL');
   const [buyAmount, setBuyAmount] = useState('');
   const [sellAmount, setSellAmount] = useState('');
   const [hold, setHold] = useState(false);
-  const TMinus = 2;
+  const [selectedTrades, setSelectedTrades] = useState({});
+  const TMinus = 60;
   const MaxRound = 10;
   const [counter, setCounter] = useState(TMinus);
   const [gameEnd, setGameEnd] = useState(false);
+  const [refreshHistory, setRefreshHistory] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTickers, setSelectedTickers] = useState([]);
   const userId = 1;
   const [CandlestickChartData, setCandlestickChartData] = useState([]);
   const location = useLocation();
@@ -67,7 +74,39 @@ const CompetitionLayout = () => {
     return () => clearTimeout(timerId);
   }, [counter, gameEnd]);
 
-  const stockList = ['AAPL', 'GOOGL', 'AMZN'];
+  const tickers = [
+    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'JPM', 'BAC', 'C', 'WFC', 'GS',
+    'JNJ', 'PFE', 'MRK', 'ABBV', 'BMY', 'XOM', 'CVX', 'COP', 'SLB', 'BKR',
+    'DIS', 'NFLX', 'CMCSA', 'NKE', 'SBUX', 'CAT', 'DE', 'MMM', 'GE', 'HON'
+  ];
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleTickerSelection = (ticker) => {
+    setSelectedTickers((prev) => {
+      if (prev.includes(ticker)) {
+        return prev.filter((item) => item !== ticker);
+      }
+      if (prev.length < 3) {
+        return [...prev, ticker];
+      }
+      return prev;
+    });
+  };
+
+  const confirmSelection = () => {
+    if (selectedTickers.length === 3) {
+      setSelectedStock(selectedTickers);
+      setCurrentStock(selectedTickers[0]); // 默认选择第一个股票
+      closeModal();
+    }
+  };
 
   const handleBuySellChange = (stock, type, amount) => {
     setSelectedTrades((prevTrades) => ({
@@ -90,32 +129,54 @@ const CompetitionLayout = () => {
     setHold(false);
   };
 
-  const handleSubmit = () => {
-    // 提交逻辑，例如更新余额和股票状态
-    if (buyAmount || sellAmount || hold) {
-      // Handle submit logic here
+  const handleSubmit = async () => {
+  const date = currentDate.toISOString();
 
-      console.log('Submitted');
-      // Reset form
-      setBuyAmount('');
-      setSellAmount('');
-      setHold(false);
-      handleNextRound();
+  for (const stock of Object.keys(selectedTrades)) {
+    const { type, amount } = selectedTrades[stock];
+
+    const transaction = {
+      user_id: userId,
+      stock_symbol: stock,
+      transaction_type: type,
+      amount: parseFloat(amount),
+      date: date
+    };
+
+    try {
+      await axios.post('http://localhost:5000/api/transactions', transaction);
+      console.log('Transaction submitted:', transaction);
+    } catch (error) {
+      console.error('Error submitting transaction:', error);
     }
-  };
+  }
 
-  // console.log('counter', counter, 'currentRound', currentRound);
+  setBuyAmount('');
+  setSellAmount('');
+  setHold(false);
+  setSelectedTrades({});
+  setRefreshHistory(!refreshHistory); // 触发交易历史刷新
+  handleNextRound();
+};
+
 
   const handleNextRound = () => {
-    // Handle next round logic here
-    // console.log('Next round');
-    if (currentRound === 10) {
+    // 更新游戏日期逻辑，每次增加n个交易日
+    const nextDate = new Date(currentDate);
+    const n = 1; // 设定n为1个交易日
+    nextDate.setDate(currentDate.getDate() + n);
+
+    if (currentRound === MaxRound) {
       setGameEnd(true);
       return;
     }
+
     setCurrentRound(currentRound + 1);
+    setCurrentDate(nextDate);
     setCounter(TMinus);
   };
+
+  const filteredMarketData = marketData.filter(data => data.date <= currentDate);
 
   return (
     <div className="background">
@@ -124,6 +185,7 @@ const CompetitionLayout = () => {
           <AppHeader />
           <div className="top-bar d-flex justify-content-between align-items-center">
             <div>Mode: {difficulty}</div>
+            <button onClick={openModal}>Select Stocks</button>
             <div>Current Round: {currentRound}/{MaxRound}  &emsp;  Countdown: {counter}</div>
 
             <CDropdown variant="dropdown">
@@ -141,9 +203,9 @@ const CompetitionLayout = () => {
           </div>
           <div className="body flex-grow-1 px-3 d-flex flex-column align-items-center">
             <div className="stock-switcher">
-              <button onClick={() => setSelectedStock('AAPL')}>AAPL</button>
-              <button onClick={() => setSelectedStock('GOOGL')}>GOOGL</button>
-              <button onClick={() => setSelectedStock('AMZN')}>AMZN</button>
+              {selectedStock.map((stock) => (
+                <button key={stock} onClick={() => setCurrentStock(stock)}>{stock}</button>
+              ))}
             </div>
             <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
               <div className="stock-info" style={{ backgroundColor: 'transparent', flex: '1', padding: '1em' }}>
@@ -153,6 +215,7 @@ const CompetitionLayout = () => {
               </div>
               <div className="report" style={{ flex: "1", padding: '1em' }}>
                 <FinancialReport selectedStock={selectedStock}
+                  currentDate={currentDate}
                   stockData={stockData}
                   chartWidth="95%"
                   chartHeight={250}
@@ -165,11 +228,11 @@ const CompetitionLayout = () => {
                   rowGap={20}
                   colGap={5}
                   chartContainerHeight={300}
-                  rowsPerPage={6} />
+                  rowsPerPage={5} />
               </div>
             </div>
             <div className="bottom-section d-flex justify-content-between">
-              <StockTradeComponent initialBalance={initialBalance} userId={userId} />
+              <StockTradeComponent initialBalance={initialBalance} userId={userId} selectedStock={selectedStock} />
               <div className="ranking">
                 <h3>Standings:</h3>
                 <table>
@@ -200,78 +263,31 @@ const CompetitionLayout = () => {
                 <option value="1">1</option>
                 {/* Other options */}
               </select>
-              <div className="history-records">
-                <div>
-                  <h4>yours:</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Stocks</th>
-                        <th>Buy</th>
-                        <th>Sell</th>
-                        <th>Hold</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Stock 1</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <td>Stock 2</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <td>Stock 3</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div>
-                  <h4>AI:</h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Stocks</th>
-                        <th>Buy</th>
-                        <th>Sell</th>
-                        <th>Hold</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Stock 1</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <td>Stock 2</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                      </tr>
-                      <tr>
-                        <td>Stock 3</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+              <TradeHistory userId={userId} refreshHistory={refreshHistory} selectedStock={selectedStock} />            </div>
           </div>
         </div>
       </div>
+
+      <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks">
+        <h2>Select 3 Stocks</h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          {tickers.map((ticker) => (
+            <button
+              key={ticker}
+              onClick={() => handleTickerSelection(ticker)}
+              style={{
+                margin: '5px',
+                padding: '10px',
+                backgroundColor: selectedTickers.includes(ticker) ? 'green' : 'gray'
+              }}
+            >
+              {ticker}
+            </button>
+          ))}
+        </div>
+        <button onClick={confirmSelection}>Confirm</button>
+        <button onClick={closeModal}>Close</button>
+      </Modal>
     </div>
   );
 }

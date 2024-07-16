@@ -1,23 +1,50 @@
 from flask import Blueprint, request, jsonify
 import os
 import json
+import pandas as pd
+from datetime import datetime
+from utils.db_utils import db, GameInfo
 
 game_bp = Blueprint('game', __name__)
 RECORDS_DIR = 'records'
 PREDICTIONS_DIR = 'predictions'
 
+
 @game_bp.route('/game_info', methods=['GET'])
 def get_game_info():
-    with open(os.path.join(RECORDS_DIR, 'game_info.json'), 'r') as f:
-        game_info = json.load(f)
-    return jsonify(game_info)
+    game_id = request.args.get('game_id')
+    if not game_id:
+        return jsonify({'error': 'Game ID is required'}), 400
+
+    game_infos = GameInfo.query.filter_by(game_id=game_id).all()
+    game_info_list = [
+        {
+            'id': game_info.id,
+            'game_id': game_info.game_id,
+            'user_id': game_info.user_id,
+            'balance': game_info.balance,
+            'score': game_info.score,
+            'last_updated': game_info.last_updated.isoformat()
+        }
+        for game_info in game_infos
+    ]
+    return jsonify(game_info_list)
+
 
 @game_bp.route('/game_info', methods=['POST'])
 def store_game_info():
-    game_info = request.get_json()
-    with open(os.path.join(RECORDS_DIR, 'game_info.json'), 'w') as f:
-        json.dump(game_info, f)
+    game_info_data = request.get_json()
+    game_info = GameInfo(
+        game_id=game_info_data['game_id'],
+        user_id=game_info_data['user_id'],
+        balance=game_info_data['balance'],
+        score=game_info_data['score'],
+        last_updated=datetime.utcnow()
+    )
+    db.session.add(game_info)
+    db.session.commit()
     return jsonify({'status': 'success'})
+
 
 @game_bp.route('/predictions/<stock>', methods=['GET'])
 def get_predictions(stock):
@@ -25,6 +52,6 @@ def get_predictions(stock):
     if os.path.exists(file_path):
         with open(file_path, 'rb') as f:
             predictions = pd.read_pickle(f)
-        return jsonify(predictions)
+        return predictions.to_json(orient='records')
     else:
         return jsonify({'error': 'Prediction file not found'}), 404

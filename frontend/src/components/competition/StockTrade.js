@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const StockTradeComponent = ({ initialBalance, userId }) => {
-  const [selectedTrades, setSelectedTrades] = useState({
-    stock1: { type: 'hold', amount: '' },
-    stock2: { type: 'hold', amount: '' },
-    stock3: { type: 'hold', amount: '' }
-  });
+const StockTradeComponent = ({ initialBalance, userId, selectedStock }) => {
+  const [selectedTrades, setSelectedTrades] = useState({});
   const [balance, setBalance] = useState(initialBalance);
   const [remainingBalance, setRemainingBalance] = useState(initialBalance);
   const [gameEnd, setGameEnd] = useState(false);
+
+  useEffect(() => {
+    // 初始化默认选择为hold
+    const initialTrades = {};
+    selectedStock.forEach(stock => {
+      initialTrades[stock] = { type: 'hold', amount: '' };
+    });
+    setSelectedTrades(initialTrades);
+  }, [selectedStock]);
 
   console.log('selectedTrades:', selectedTrades);
 
@@ -27,11 +32,11 @@ const StockTradeComponent = ({ initialBalance, userId }) => {
   };
 
   const handleClear = () => {
-    setSelectedTrades({
-      stock1: { type: 'hold', amount: '' },
-      stock2: { type: 'hold', amount: '' },
-      stock3: { type: 'hold', amount: '' }
+    const clearedTrades = {};
+    selectedStock.forEach(stock => {
+      clearedTrades[stock] = { type: 'hold', amount: '' };
     });
+    setSelectedTrades(clearedTrades);
   };
 
   const handleSubmit = () => {
@@ -44,7 +49,6 @@ const StockTradeComponent = ({ initialBalance, userId }) => {
       amount: parseInt(selectedTrades[stock].amount) || 0,
       date: new Date().toISOString()  // 当前时间
     }));
-
 
     transactions.forEach(transaction => {
       fetch('http://localhost:5000/api/transactions', {
@@ -70,7 +74,7 @@ const StockTradeComponent = ({ initialBalance, userId }) => {
       <div>Balance: {remainingBalance}</div>
 
       <div className="stock-container">
-        {['stock1', 'stock2', 'stock3'].map((stock) => (
+        {selectedStock.map((stock) => (
           <div key={stock} className="stock-item" style={{ flex: '1' }}>
             <div className="stock-name">{stock}</div>
             <div className="trade-options">
