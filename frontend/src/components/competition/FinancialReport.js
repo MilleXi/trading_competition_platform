@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import axios from 'axios';
 
 
 const FinancialReport = ({
   selectedStock,
   currentDate,
   stockData,
+  setStockData,
   chartWidth = '100%',
   chartHeight = 300,
   chartTop = 50,
