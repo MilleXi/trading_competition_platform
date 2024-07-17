@@ -58,8 +58,11 @@ const CompetitionLayout = () => {
         });
         setStockData(response.data);
         setCandlestickChartData(response.data.map(data => ({
-          x: new Date(data.date),
-          y: [data.open, data.high, data.low, data.close]
+          date: new Date(data.date),
+          open: parseFloat(data.open),
+          high: parseFloat(data.high),
+          low: parseFloat(data.low),
+          close: parseFloat(data.close),
         })));
       } catch (error) {
         console.error('Error fetching stock data:', error);
@@ -236,7 +239,7 @@ const CompetitionLayout = () => {
     }
   };
 
-  const filteredCandlestickChartData = CandlestickChartData.filter(data => data.x < currentDate);
+  const filteredCandlestickChartData = CandlestickChartData.filter(data => data.date < currentDate);
 
   const closeStrategyModal = () => {
     setShowStrategyModal(false);
