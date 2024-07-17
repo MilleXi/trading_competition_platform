@@ -19,7 +19,6 @@ const CompetitionLayout = () => {
   const gameIdRef = useRef(uuidv4());
   const gameId = gameIdRef.current;
   const modelList = ['LSTM']
-  const [marketData, setMarketData] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [currentDate, setCurrentDate] = useState(startDate);
   const [selectedStock, setSelectedStock] = useState('AAPL');
@@ -193,7 +192,7 @@ const CompetitionLayout = () => {
     }
   };
 
-  const filteredMarketData = marketData.filter(data => data.date <= currentDate);
+  const filteredCandlestickChartData = CandlestickChartData.filter(data => data.x <= currentDate);
 
   return (
     <div className="background">
@@ -232,7 +231,7 @@ const CompetitionLayout = () => {
             <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
               <div className="stock-info" style={{ backgroundColor: 'transparent', flex: '1', padding: '1em' }}>
                 <div style={{ backgroundColor: 'white', color: 'black' }}>
-                  <CandlestickChart data={CandlestickChartData} stockName={selectedStock} />
+                  <CandlestickChart data={filteredCandlestickChartData} stockName={selectedStock} />
                 </div>
               </div>
               <div className="report" style={{ flex: "1", padding: '1em' }}>
