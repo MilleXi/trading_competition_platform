@@ -13,7 +13,7 @@ import TradeHistory from '../components/competition/TradeHistory';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
-  const startDate = new Date('2022-01-01');
+  const startDate = new Date('2022-01-03');
   const gameId = 1;
   const [marketData, setMarketData] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
@@ -161,32 +161,6 @@ const CompetitionLayout = () => {
     handleNextRound();
   };
 
-  const isTradingDay = (date) => {
-    const day = date.getDay();
-    // 检查是否为周末，假设周六和周日不是交易日
-    if (day === 0 || day === 6) {
-      return false;
-    }
-    // 这里可以添加更多的逻辑来处理假期，例如：
-    // const holidays = ["2023-01-01", "2023-12-25"]; // 示例假期列表
-    // if (holidays.includes(date.toISOString().split('T')[0])) {
-    //   return false;
-    // }
-    return true;
-  };
-
-  const getNextTradingDay = (currentDate, n) => {
-    let nextDate = new Date(currentDate);
-    let tradingDaysAdded = 0;
-
-    while (tradingDaysAdded < n) {
-      nextDate.setDate(nextDate.getDate() + 1);
-      if (isTradingDay(nextDate)) {
-        tradingDaysAdded++;
-      }
-    }
-    return nextDate;
-  };
 
 
   const handleNextRound = async () => {
