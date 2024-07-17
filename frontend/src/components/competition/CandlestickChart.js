@@ -89,6 +89,8 @@ class CandlestickChart extends Component {
           name: "Price (in USD)",
           yValueFormatString: "$#,###.##",
           type: "candlestick",
+          risingColor: "green",
+          fallingColor: "red",
           dataPoints: dataPoints1
         }]
       }],
@@ -98,7 +100,7 @@ class CandlestickChart extends Component {
         }],
         slider: {
           minimum: Math.max(dataPoints1.length - 30, 0),
-          maximum: dataPoints1.length - 1
+          maximum: dataPoints1.length
         }
       }
     };
