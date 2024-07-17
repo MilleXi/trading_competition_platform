@@ -30,6 +30,7 @@ class StockData(db.Model):
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    game_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     stock_symbol = db.Column(db.String(10), nullable=False)
     transaction_type = db.Column(db.String(10), nullable=False)  # "buy" or "sell"
