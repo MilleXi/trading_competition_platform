@@ -3,6 +3,7 @@ import os
 import json
 import pandas as pd
 from datetime import datetime
+import yfinance as yf
 from utils.db_utils import db, GameInfo
 
 from flask import Flask
@@ -60,3 +61,19 @@ def get_predictions(stock):
         return predictions.to_json(orient='records')
     else:
         return jsonify({'error': 'Prediction file not found'}), 404
+
+
+@game_bp.route('/next_trading_day', methods=['POST'])
+def next_trading_day():
+  data = request.json
+  current_date = pd.to_datetime(data['current_date'])
+  n = data.get('n', 1)
+
+  # 获取所有交易日数据
+  df = yf.download("SPY", start="2010-01-01", end="2030-12-31")  # 使用SPY代表标准交易日
+  trading_days = df.index
+
+  # 计算下一个交易日
+  next_trading_day = trading_days[trading_days > current_date][n - 1]
+
+  return jsonify({"next_trading_day": next_trading_day.strftime('%Y-%m-%d')})
