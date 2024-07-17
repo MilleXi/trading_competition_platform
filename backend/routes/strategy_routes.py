@@ -356,12 +356,13 @@ def get_trade_log():
     date_str = request.args.get('date')
 
     try:
-        date = datetime.strptime(date_str, '%Y-%m-%d')
+        date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        print("date:", date)
     except ValueError:
         return jsonify({"error": "Date format error"}), 400
 
     trade_log = TradeLog.query.filter_by(game_id=game_id, model=model, date=date).first()
-
+    print("trade_log:", trade_log)
     if not trade_log:
         return jsonify({"error": "Trade log not found"}), 404
 

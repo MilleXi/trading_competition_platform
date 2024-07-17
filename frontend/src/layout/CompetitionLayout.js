@@ -15,7 +15,7 @@ import App from '../App';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
-  const startDate = new Date('2022-01-03');
+  const startDate = new Date('2023-01-03');
   const gameIdRef = useRef(uuidv4());
   const gameId = gameIdRef.current;
   const modelList = ['LSTM']
@@ -40,6 +40,8 @@ const CompetitionLayout = () => {
   const location = useLocation();
   const { difficulty } = location.state || { difficulty: 'Easy' };
   const rootElement = document.getElementById('root');
+  const [aiStrategy, setAiStrategy] = useState({});
+  const [showStrategyModal, setShowStrategyModal] = useState(false);
 
   Modal.setAppElement(rootElement);
 
@@ -165,10 +167,33 @@ const CompetitionLayout = () => {
       }
     }
 
+    // 获取AI策略
+    try {
+      const aiResponse = await axios.get('http://localhost:8000/api/get_trade_log', {
+        params: {
+          game_id: gameId,
+          model: 'LSTM',
+          date: date.split('T')[0],
+        }
+      });
+
+      if (aiResponse.data) {
+        console.log("AI Strategy:", aiResponse.data)
+        setAiStrategy(aiResponse.data);
+        setShowStrategyModal(true); // 显示策略模态窗口
+      } else {
+        console.error('No AI strategy found');
+      }
+    } catch (error) {
+      console.error('Error fetching AI strategy:', error);
+    }
+
+
     setSelectedTrades(selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: { type: 'hold', amount: '0' } }), {}));
     setRefreshHistory(prev => !prev); // 触发交易历史刷新
     handleNextRound();
   };
+
 
   const handleNextRound = async () => {
     // 更新游戏日期逻辑，每次增加n个交易日
@@ -194,6 +219,10 @@ const CompetitionLayout = () => {
   };
 
   const filteredMarketData = marketData.filter(data => data.date <= currentDate);
+
+  const closeStrategyModal = () => {
+    setShowStrategyModal(false);
+  };
 
   return (
     <div className="background">
@@ -311,6 +340,47 @@ const CompetitionLayout = () => {
         </div>
         <button onClick={confirmSelection}>Confirm</button>
         {/* <button onClick={closeModal} disabled={selectedTickers.length < 3}>Cancel</button> */}
+      </Modal>
+
+      <Modal
+        isOpen={showStrategyModal}
+        onRequestClose={closeStrategyModal}
+        contentLabel="Strategy Modal"
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: 'auto',
+          }
+        }}
+      >
+        <h2>Strategy for {currentDate.toISOString().split('T')[0]}</h2>
+        <div>
+          <h3>Player's Strategy:</h3>
+          {Object.entries(selectedTrades).map(([stock, trade]) => (
+            <div key={stock}>
+              <p>{stock}: {trade.type} {trade.amount}</p>
+            </div>
+          ))}
+        </div>
+        <div>
+          <h3>AI's Strategy:</h3>
+          {aiStrategy && aiStrategy.change ? (
+            Object.entries(aiStrategy.change).map(([stock, change]) => (
+              <div key={stock}>
+                <p>{stock}: {change}</p>
+              </div>
+            ))
+          ) : (
+            <p>No AI strategy found</p>
+          )}
+        </div>
+        <button onClick={closeStrategyModal} style={{ display: 'block', margin: '20px auto' }}>Close</button>
       </Modal>
     </div >
   );
