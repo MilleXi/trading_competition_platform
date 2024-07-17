@@ -7,3 +7,56 @@
   padding: 10px;
   text-align: center;
 }
+
+.history-section {
+  padding: 20px;
+  max-height: 600px; /* 设置最大高度 */
+  overflow-y: auto; /* 启用滚动条 */
+}
+
+.trade-history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 120%; /* 增大字体 */
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.history-header .history-title {
+  flex: 1;
+  text-align: center;
+  font-size: 200%; /* 增大标题字体 */
+}
+
+.history-header .history-divider {
+  width: 2px;
+  background-color: gray;
+}
+
+.history-tables {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.history-table {
+  flex: 1;
+  margin: 0 10px;
+}
+
+.history-table table {
+  width: 100%;
+}
+
+.history-divider-vertical {
+  width: 2px;
+  background-color: gray;
+  margin: 0 10px;
+}
+

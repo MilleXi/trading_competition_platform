@@ -176,10 +176,28 @@ const CompetitionLayout = () => {
           date: date.split('T')[0],
         }
       });
-
+      // 传输ai的交易记录
       if (aiResponse.data) {
         console.log("AI Strategy:", aiResponse.data)
         setAiStrategy(aiResponse.data);
+
+        const aiTransactions = Object.entries(aiResponse.data.change).map(([stock, amount]) => ({
+        game_id: gameId,
+        user_id: 'ai', // 或者用一个特定的AI用户ID
+        stock_symbol: stock,
+        transaction_type: amount > 0 ? 'buy' : 'sell',
+        amount: Math.abs(amount),
+        date: date,
+      }));
+      for (const transaction of aiTransactions) {
+        try {
+          await axios.post('http://localhost:8000/api/transactions', transaction);
+          console.log('AI Transaction submitted:', transaction);
+        } catch (error) {
+          console.error('Error submitting AI transaction:', error);
+        }
+      }
+
         setShowStrategyModal(true); // 显示策略模态窗口
       } else {
         console.error('No AI strategy found');
