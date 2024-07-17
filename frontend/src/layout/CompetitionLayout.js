@@ -10,6 +10,7 @@ import CandlestickChart from '../components/competition/CandlestickChart';
 import StockTradeComponent from '../components/competition/StockTrade';
 import FinancialReport from '../components/competition/FinancialReport';
 import TradeHistory from '../components/competition/TradeHistory';
+import PointsStoreModal from '../components/competition/PointsStoreModal';
 import { v4 as uuidv4 } from 'uuid';
 import App from '../App';
 import zIndex from '@mui/material/styles/zIndex';
@@ -51,6 +52,10 @@ const CompetitionLayout = () => {
   const [aiStrategy, setAiStrategy] = useState({});
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [stopCounter, setStopCounter] = useState(false);
+  const [showPointsStore, setShowPointsStore] = useState(false);
+
+  const handleClosePointsStore = () => setShowPointsStore(false);
+  const handleShowPointsStore = () => setShowPointsStore(true);
 
   Modal.setAppElement(rootElement);
 
@@ -263,35 +268,38 @@ const CompetitionLayout = () => {
         <div className="wrapper d-flex flex-column min-vh-100" style={{ color: 'white' }}>
           <AppHeader />
           <div className="d-flex justify-content-between align-items-center">
-          <div
-            onClick={openModal}
-            style={{
-                backgroundColor: 'green',
-                color: 'white',
-                padding: '10px 20px',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                textAlign: 'center',
-                fontSize: '16px',
-                display: 'inline-block'
-            }}
-            >
-            Select Stocks
-          </div>
-          <div>Mode: {difficulty}  &emsp;  Current Round: {currentRound}/{MaxRound}  &emsp;  Current Date: {currentDate.toISOString().split('T')[0]}  &emsp;  Countdown: {counter}</div>
-            <CDropdown variant="dropdown">
-              <CDropdownToggle caret={true}>
-                <span style={{ color: 'white' }}>Game Credits: 100</span>
-              </CDropdownToggle>
+            <div
+                onClick={openModal}
+                style={{
+                    backgroundColor: 'green',
+                    color: 'white',
+                    padding: '10px 20px',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    fontSize: '16px',
+                    display: 'inline-block'
+                }}
+                >
+                Select Stocks
+            </div>
 
-              <CDropdownMenu className='dropdown-menu'>
-                <CDropdownItem className='dropdown-item'>
-                  <span style={{ color: 'white' }}>Shop</span>
+          <div>Mode: {difficulty} &emsp; Current Round: {currentRound}/{MaxRound} &emsp; Current Date: {currentDate.toISOString().split('T')[0]} &emsp; Countdown: {counter}</div>
+            <CDropdown variant="dropdown">
+                <CDropdownToggle caret={true}>
+                <span style={{ color: 'white' }}>Game Credits: 50</span>
+                </CDropdownToggle>
+
+                <CDropdownMenu className='dropdown-menu'>
+                <CDropdownItem className='dropdown-item' onClick={handleShowPointsStore}>
+                    <span style={{ color: 'white' }}>Shop</span>
                 </CDropdownItem>
-                {/* 积分商城内容可以在此处添加 */}
-              </CDropdownMenu>
+                </CDropdownMenu>
             </CDropdown>
+
+            {/* Points Store Modal */}
+            <PointsStoreModal show={showPointsStore} handleClose={handleClosePointsStore} />
           </div>
 
           <div className="body flex-grow-1 px-3 d-flex flex-column align-items-center">
