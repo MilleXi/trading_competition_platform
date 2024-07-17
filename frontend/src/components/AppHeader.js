@@ -44,7 +44,7 @@ const AppHeader = () => {
     })
   }, [])
 
-  console.log('Header rendered');
+  // console.log('Header rendered');
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef} style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', borderBottom: 'none' }}>
       <CContainer className="px-4" fluid>
