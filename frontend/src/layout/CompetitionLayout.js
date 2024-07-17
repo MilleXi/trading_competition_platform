@@ -12,7 +12,6 @@ import FinancialReport from '../components/competition/FinancialReport';
 import TradeHistory from '../components/competition/TradeHistory';
 import { v4 as uuidv4 } from 'uuid';
 import App from '../App';
-import zIndex from '@mui/material/styles/zIndex';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
