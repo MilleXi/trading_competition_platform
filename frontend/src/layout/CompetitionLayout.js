@@ -108,7 +108,6 @@ const CompetitionLayout = () => {
       setSelectedStockList(selectedTickers);
       setSelectedStock(selectedTickers[0]); // 默认选择第一个股票
       closeModal();
-      console.log(1111111111111)
     }
 
     try {
@@ -162,20 +161,55 @@ const CompetitionLayout = () => {
     handleNextRound();
   };
 
-  const handleNextRound = () => {
-    // 更新游戏日期逻辑，每次增加n个交易日
-    const nextDate = new Date(currentDate);
-    const n = 1; // 设定n为1个交易日
-    nextDate.setDate(currentDate.getDate() + n);
-
-    if (currentRound === MaxRound) {
-      setGameEnd(true);
-      return;
+  const isTradingDay = (date) => {
+    const day = date.getDay();
+    // 检查是否为周末，假设周六和周日不是交易日
+    if (day === 0 || day === 6) {
+      return false;
     }
+    // 这里可以添加更多的逻辑来处理假期，例如：
+    // const holidays = ["2023-01-01", "2023-12-25"]; // 示例假期列表
+    // if (holidays.includes(date.toISOString().split('T')[0])) {
+    //   return false;
+    // }
+    return true;
+  };
 
-    setCurrentRound(currentRound + 1);
-    setCurrentDate(nextDate);
-    setCounter(TMinus);
+  const getNextTradingDay = (currentDate, n) => {
+    let nextDate = new Date(currentDate);
+    let tradingDaysAdded = 0;
+
+    while (tradingDaysAdded < n) {
+      nextDate.setDate(nextDate.getDate() + 1);
+      if (isTradingDay(nextDate)) {
+        tradingDaysAdded++;
+      }
+    }
+    return nextDate;
+  };
+
+
+  const handleNextRound = async () => {
+    // 更新游戏日期逻辑，每次增加n个交易日
+    const n = 1; // 设定n为1个交易日
+    try {
+      const response = await axios.post('http://localhost:5000/api/next_trading_day', {
+        current_date: currentDate.toISOString().split('T')[0],
+        n: n
+      });
+      const nextDate = new Date(response.data.next_trading_day);
+
+      if (currentRound === MaxRound) {
+        setGameEnd(true);
+        return;
+      }
+
+      setCurrentRound(currentRound + 1);
+      setCurrentDate(nextDate);
+      setCounter(TMinus);
+    } catch (error) {
+      console.error('Error fetching next trading day:', error);
+    }
   };
 
   const filteredMarketData = marketData.filter(data => data.date <= currentDate);
@@ -204,10 +238,15 @@ const CompetitionLayout = () => {
             </CDropdown>
           </div>
           <div className="body flex-grow-1 px-3 d-flex flex-column align-items-center">
-            <div className="stock-switcher">
-              {selectedStockList.map((stock) => (
-                <button key={stock} onClick={() => setSelectedStock(stock)}>{stock}</button>
-              ))}
+            <div className="d-flex justify-content-between align-items-center w-100 mb-3">
+              <div>Current Date: {currentDate.toISOString().split('T')[0]}</div>
+              <div className="d-flex justify-content-center w-100">
+                <div className="stock-switcher d-flex justify-content-center">
+                  {selectedStockList.map((stock) => (
+                    <button key={stock} onClick={() => setSelectedStock(stock)}>{stock}</button>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
               <div className="stock-info" style={{ backgroundColor: 'transparent', flex: '1', padding: '1em' }}>
