@@ -13,6 +13,14 @@ import TradeHistory from '../components/competition/TradeHistory';
 import { v4 as uuidv4 } from 'uuid';
 import App from '../App';
 import zIndex from '@mui/material/styles/zIndex';
+import Box from '@mui/material/Box';
+import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
@@ -345,10 +353,10 @@ const CompetitionLayout = () => {
           </div>
         </div>
       </div>
-
+    
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks"
         style={{
-          content: {
+            content: {
             top: '50%',
             left: '50%',
             right: 'auto',
@@ -357,29 +365,55 @@ const CompetitionLayout = () => {
             transform: 'translate(-50%, -50%)',
             width: '80%',
             height: 'auto',
-            zIndex: '1000'
-          }
+            zIndex: '1000',
+            border: '1px solid #ccc',
+            borderRadius: '10px',
+            padding: '20px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            }
         }}
-      >
-        <h2>Select 3 Stocks</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {tickers.map((ticker) => (
-            <button
-              key={ticker}
-              onClick={() => handleTickerSelection(ticker)}
-              style={{
-                margin: '5px',
-                padding: '10px',
-                backgroundColor: selectedTickers.includes(ticker) ? 'green' : 'gray'
-              }}
+        >
+        <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '20px'}}>Please Select 3 Stocks</h2>
+        <Grid container spacing={2}>
+            {tickers.map((ticker) => (
+            <Grid item xs={2} key={ticker}>
+                <FormControlLabel
+                control={
+                    <Checkbox
+                    checked={selectedTickers.includes(ticker)}
+                    onChange={() => handleTickerSelection(ticker)}
+                    name={ticker}
+                    color="primary"
+                    />
+                }
+                label={
+                    <Typography sx={{ fontSize: '22px', color: 'black' }}>
+                      {ticker}
+                    </Typography>
+                  }
+                />
+            </Grid>
+            ))}
+        </Grid>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+            <button 
+            onClick={confirmSelection}
+            style={{
+                padding: '10px 20px',
+                backgroundColor: '#008CBA',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                outline: 'none',
+                fontSize: '20px'
+            }}
             >
-              {ticker}
+            Confirm
             </button>
-          ))}
         </div>
-        <button onClick={confirmSelection}>Confirm</button>
-        {/* <button onClick={closeModal} disabled={selectedTickers.length < 3}>Cancel</button> */}
       </Modal>
+
 
       <Modal
         isOpen={showStrategyModal}
