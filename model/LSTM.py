@@ -16,11 +16,11 @@ import os
 # tickers += ['XOM', 'CVX', 'COP', 'SLB', 'BKR',]          # 能源
 # tickers += ['DIS', 'NFLX', 'CMCSA', 'NKE', 'SBUX',]      # 消费
 # tickers += ['CAT', 'DE', 'MMM', 'GE', 'HON']            # 工业
-tickers = ['AAPL']
+tickers = ['AAPL', 'DIS', 'NFLX']
 
 num_features_to_keep = 9
-start_date = '2018-12-01'
-end_date = '2024-01-01'
+start_date = '2020-01-01'
+end_date = '2022-01-01'
 
 
 def get_stock_data(ticker):
@@ -158,8 +158,8 @@ def feature_selection_for_stocks(stock_features, best_params, num_features_to_ke
 
 # 进行特征选择
 temp_params = {'colsample_bytree': 0.7, 'learning_rate': 0.01, 'max_depth': 12, 'n_estimators': 50, 'subsample': 0.6}
-stock_features_selected = feature_selection_for_stocks(stock_features, temp_params, num_features_to_keep)
-
+# stock_features_selected = feature_selection_for_stocks(stock_features, temp_params, num_features_to_keep)
+stock_features_selected = stock_features
 
 
 
@@ -617,10 +617,10 @@ for record in lstm_strategy.trade_log:
 import pickle
 if not os.path.exists('prediction/'):
   os.makedirs('prediction')
-if not os.path.exists('prediction/LSTM'):
-  os.makedirs('prediction/LSTM')
+if not os.path.exists('../backend/predictions/LSTM'):
+  os.makedirs('../backend/predictions/LSTM')
 for ticker, predictions in all_predictions_lstm.items():
-  file_path = os.path.join('prediction/LSTM', f'{ticker}_predictions.pkl')
+  file_path = os.path.join('../backend/predictions/LSTM', f'{ticker}_predictions.pkl')
   with open(file_path, 'wb') as file:
     pickle.dump(predictions, file)
     print(f'Saved predictions for {ticker} to {file_path}')

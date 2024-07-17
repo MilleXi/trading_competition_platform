@@ -13,7 +13,8 @@ import TradeHistory from '../components/competition/TradeHistory';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
-  const startDate = new Date('2022-01-01');
+  const startDate = new Date('2022-01-03');
+  const gameId = 1;
   const [marketData, setMarketData] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [currentDate, setCurrentDate] = useState(startDate);
@@ -102,12 +103,33 @@ const CompetitionLayout = () => {
     });
   };
 
-  const confirmSelection = () => {
+  const confirmSelection = async () => {
     if (selectedTickers.length === 3) {
       setSelectedStockList(selectedTickers);
       setSelectedStock(selectedTickers[0]); // 默认选择第一个股票
       closeModal();
     }
+
+    try {
+        const response = await axios.post('http://localhost:5000/api/run_strategy', {
+          tickers: selectedTickers,
+          game_id: gameId,
+        });
+        console.log('Strategy result:', response.data);
+
+        // 保存结果到数据库
+        for (const record of response.data.trade_log) {
+          const logEntry = {
+            ...record,
+            model: "LSTM",
+            game_id: gameId
+          };
+          await axios.post('http://localhost:5000/api/save_trade_log', logEntry);
+        }
+
+      } catch (error) {
+        console.error('Error running strategy:', error);
+      }
   };
 
   const handleSubmit = async () => {
@@ -139,20 +161,29 @@ const CompetitionLayout = () => {
     handleNextRound();
   };
 
-  const handleNextRound = () => {
+
+
+  const handleNextRound = async () => {
     // 更新游戏日期逻辑，每次增加n个交易日
-    const nextDate = new Date(currentDate);
     const n = 1; // 设定n为1个交易日
-    nextDate.setDate(currentDate.getDate() + n);
+    try {
+      const response = await axios.post('http://localhost:5000/api/next_trading_day', {
+        current_date: currentDate.toISOString().split('T')[0],
+        n: n
+      });
+      const nextDate = new Date(response.data.next_trading_day);
 
-    if (currentRound === MaxRound) {
-      setGameEnd(true);
-      return;
+      if (currentRound === MaxRound) {
+        setGameEnd(true);
+        return;
+      }
+
+      setCurrentRound(currentRound + 1);
+      setCurrentDate(nextDate);
+      setCounter(TMinus);
+    } catch (error) {
+      console.error('Error fetching next trading day:', error);
     }
-
-    setCurrentRound(currentRound + 1);
-    setCurrentDate(nextDate);
-    setCounter(TMinus);
   };
 
   const filteredMarketData = marketData.filter(data => data.date <= currentDate);
@@ -181,10 +212,15 @@ const CompetitionLayout = () => {
             </CDropdown>
           </div>
           <div className="body flex-grow-1 px-3 d-flex flex-column align-items-center">
-            <div className="stock-switcher">
-              {selectedStockList.map((stock) => (
-                <button key={stock} onClick={() => setSelectedStock(stock)}>{stock}</button>
-              ))}
+            <div className="d-flex justify-content-between align-items-center w-100 mb-3">
+              <div>Current Date: {currentDate.toISOString().split('T')[0]}</div>
+              <div className="d-flex justify-content-center w-100">
+                <div className="stock-switcher d-flex justify-content-center">
+                  {selectedStockList.map((stock) => (
+                    <button key={stock} onClick={() => setSelectedStock(stock)}>{stock}</button>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
               <div className="stock-info" style={{ backgroundColor: 'transparent', flex: '1', padding: '1em' }}>

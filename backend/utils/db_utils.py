@@ -46,6 +46,18 @@ class GameInfo(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class TradeLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False)
+    balance = db.Column(db.Float, nullable=False)
+    earning = db.Column(db.Float, nullable=False)
+    portfolio = db.Column(db.PickleType, nullable=False)
+    change = db.Column(db.PickleType, nullable=False)
+    earnings_per_stock = db.Column(db.PickleType, nullable=False)
+    model = db.Column(db.String(50), nullable=False)
+    game_id = db.Column(db.Integer, nullable=False)
+
+
 def init_db(app):
     db.init_app(app)
     with app.app_context():
