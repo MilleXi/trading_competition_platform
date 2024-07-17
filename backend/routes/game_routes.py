@@ -5,6 +5,11 @@ import pandas as pd
 from datetime import datetime
 from utils.db_utils import db, GameInfo
 
+from flask import Flask
+from flask_cors import CORS
+app = Flask(__name__)
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+
 game_bp = Blueprint('game', __name__)
 RECORDS_DIR = 'records'
 PREDICTIONS_DIR = 'predictions'
