@@ -262,16 +262,24 @@ const CompetitionLayout = () => {
       <div className="app">
         <div className="wrapper d-flex flex-column min-vh-100" style={{ color: 'white' }}>
           <AppHeader />
-          <div className="body flex-grow-1 px-3 d-flex flex-column">
-            <div>Mode: {difficulty}</div>
-            <div className="d-flex justify-content-between align-items-center w-100 mb-3">
-              <div>Current Date: {currentDate.toISOString().split('T')[0]}</div>
-            </div>
+          <div className="d-flex justify-content-between align-items-center">
+          <div
+            onClick={openModal}
+            style={{
+                backgroundColor: 'green',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                textAlign: 'center',
+                fontSize: '16px',
+                display: 'inline-block'
+            }}
+            >
+            Select Stocks
           </div>
-          <div className="top-bar d-flex justify-content-between align-items-center">
-            <div onClick={openModal} style={{ outline: "double white" }}>Select Stocks</div>
-            <div>Current Round: {currentRound}/{MaxRound}  &emsp;  Countdown: {counter}</div>
-
+          <div>Mode: {difficulty}  &emsp;  Current Round: {currentRound}/{MaxRound}  &emsp;  Current Date: {currentDate.toISOString().split('T')[0]}  &emsp;  Countdown: {counter}</div>
             <CDropdown variant="dropdown">
               <CDropdownToggle caret={true}>
                 <span style={{ color: 'white' }}>Game Credits: 100</span>
@@ -285,6 +293,7 @@ const CompetitionLayout = () => {
               </CDropdownMenu>
             </CDropdown>
           </div>
+
           <div className="body flex-grow-1 px-3 d-flex flex-column align-items-center">
             <div className="d-flex justify-content-center w-100 mb-3" style={{ padding: '1em' }}>
               {selectedStockList.map((stock) => (
