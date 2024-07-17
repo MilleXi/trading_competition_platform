@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Button from '@mui/material/Button';
 
-const StockTradeComponent = ({selectedTrades, setSelectedTrades, initialBalance, userId, selectedStock, handleSubmit }) => {
+const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance, userId, selectedStock, handleSubmit }) => {
   const [balance, setBalance] = useState(initialBalance);
   const [remainingBalance, setRemainingBalance] = useState(initialBalance);
   const [gameEnd, setGameEnd] = useState(false);
@@ -104,15 +105,18 @@ const StockTradeComponent = ({selectedTrades, setSelectedTrades, initialBalance,
           </div>
         ))}
       </div>
-
-      <button className="clear-button" onClick={handleClear}>Clear</button>
-      <button
-        className={`submit-button ${Object.values(selectedTrades).length > 0 && !gameEnd ? 'active' : 'disabled'}`}
-        onClick={handleSubmit}
-        disabled={Object.keys(selectedTrades).length === 0}
-      >
-        Submit
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <Button className="clear-button" onClick={handleClear} variant='outlined' style={{color:'#e3f2fd'}}>Clear</Button>
+        <Button
+          className={`submit-button ${Object.values(selectedTrades).length > 0 && !gameEnd ? 'active' : 'disabled'}`}
+          variant='outlined'
+          style={{color:'#e0f2f1'}}
+          onClick={handleSubmit}
+          disabled={Object.keys(selectedTrades).length === 0}
+        >
+          Submit
+        </Button>
+      </div>
     </div>
   );
 };
