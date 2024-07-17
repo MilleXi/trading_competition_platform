@@ -41,6 +41,7 @@ const CompetitionLayout = () => {
   const rootElement = document.getElementById('root');
   const [aiStrategy, setAiStrategy] = useState({});
   const [showStrategyModal, setShowStrategyModal] = useState(false);
+  const [stopCounter, setStopCounter] = useState(false);
 
   Modal.setAppElement(rootElement);
 
@@ -73,7 +74,7 @@ const CompetitionLayout = () => {
 
   useEffect(() => {
     const timerId = setTimeout(() => {
-      if (counter > 0 && !gameEnd) {
+      if (counter > 0 && !stopCounter) {
         setCounter(counter - 1);
       } else if (counter === 0 && !gameEnd) {
         if (Object.keys(selectedTrades).length > 0)
@@ -187,10 +188,8 @@ const CompetitionLayout = () => {
       console.error('Error fetching AI strategy:', error);
     }
 
+    setStopCounter(true);
 
-    setSelectedTrades(selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: { type: 'hold', amount: '0' } }), {}));
-    setRefreshHistory(prev => !prev); // 触发交易历史刷新
-    handleNextRound();
   };
 
 
@@ -206,6 +205,7 @@ const CompetitionLayout = () => {
 
       if (currentRound === MaxRound) {
         setGameEnd(true);
+        setStopCounter(true);
         return;
       }
 
@@ -221,6 +221,10 @@ const CompetitionLayout = () => {
 
   const closeStrategyModal = () => {
     setShowStrategyModal(false);
+    setSelectedTrades(selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: { type: 'hold', amount: '0' } }), {}));
+    setRefreshHistory(prev => !prev); // 触发交易历史刷新
+    handleNextRound();
+    setStopCounter(false);
   };
 
   return (
