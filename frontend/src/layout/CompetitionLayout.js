@@ -12,6 +12,7 @@ import FinancialReport from '../components/competition/FinancialReport';
 import TradeHistory from '../components/competition/TradeHistory';
 import { v4 as uuidv4 } from 'uuid';
 import App from '../App';
+import zIndex from '@mui/material/styles/zIndex';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
@@ -182,21 +183,21 @@ const CompetitionLayout = () => {
         setAiStrategy(aiResponse.data);
 
         const aiTransactions = Object.entries(aiResponse.data.change).map(([stock, amount]) => ({
-        game_id: gameId,
-        user_id: 'ai', // 或者用一个特定的AI用户ID
-        stock_symbol: stock,
-        transaction_type: amount > 0 ? 'buy' : 'sell',
-        amount: Math.abs(amount),
-        date: date,
-      }));
-      for (const transaction of aiTransactions) {
-        try {
-          await axios.post('http://localhost:8000/api/transactions', transaction);
-          console.log('AI Transaction submitted:', transaction);
-        } catch (error) {
-          console.error('Error submitting AI transaction:', error);
+          game_id: gameId,
+          user_id: 'ai', // 或者用一个特定的AI用户ID
+          stock_symbol: stock,
+          transaction_type: amount > 0 ? 'buy' : 'sell',
+          amount: Math.abs(amount),
+          date: date,
+        }));
+        for (const transaction of aiTransactions) {
+          try {
+            await axios.post('http://localhost:8000/api/transactions', transaction);
+            console.log('AI Transaction submitted:', transaction);
+          } catch (error) {
+            console.error('Error submitting AI transaction:', error);
+          }
         }
-      }
 
         setShowStrategyModal(true); // 显示策略模态窗口
       } else {
@@ -235,7 +236,7 @@ const CompetitionLayout = () => {
     }
   };
 
-  const filteredCandlestickChartData = CandlestickChartData.filter(data => data.x <= currentDate);
+  const filteredCandlestickChartData = CandlestickChartData.filter(data => data.x < currentDate);
 
   const closeStrategyModal = () => {
     setShowStrategyModal(false);
@@ -282,7 +283,7 @@ const CompetitionLayout = () => {
             <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
               <div className="stock-info" style={{ backgroundColor: 'transparent', flex: '1', padding: '1em' }}>
                 <div style={{ backgroundColor: 'white', color: 'black' }}>
-                  <CandlestickChart data={filteredCandlestickChartData} stockName={selectedStock} />
+                  <CandlestickChart data={filteredCandlestickChartData} stockName={selectedStock} style={{ zIndex: '1' }} />
                 </div>
               </div>
               <div className="report" style={{ flex: "1", padding: '1em' }}>
@@ -342,7 +343,21 @@ const CompetitionLayout = () => {
         </div>
       </div>
 
-      <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks">
+      <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks"
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: 'auto',
+            zIndex: '1000'
+          }
+        }}
+      >
         <h2>Select 3 Stocks</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
           {tickers.map((ticker) => (
@@ -377,6 +392,7 @@ const CompetitionLayout = () => {
             transform: 'translate(-50%, -50%)',
             width: '80%',
             height: 'auto',
+            zIndex: '1000'
           }
         }}
       >

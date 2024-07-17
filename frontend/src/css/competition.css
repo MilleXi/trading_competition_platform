@@ -29,6 +29,10 @@
   background-repeat: no-repeat; /* 防止背景图像重复 */
 }
 
+.apexcharts-toolbar {
+  z-index: 0 !important;
+}
+
 /* 财务报表等数据图 */
 
 
