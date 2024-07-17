@@ -20,10 +20,9 @@ const CompetitionLayout = () => {
   const [selectedStock, setSelectedStock] = useState('AAPL');
   const [selectedStockList, setSelectedStockList] = useState(['AAPL', 'MSFT', 'GOOGL']);
   const [stockData, setStockData] = useState([]);
-  const [buyAmount, setBuyAmount] = useState('');
-  const [sellAmount, setSellAmount] = useState('');
-  const [hold, setHold] = useState(false);
-  const [selectedTrades, setSelectedTrades] = useState({});
+  const [selectedTrades, setSelectedTrades] = useState(
+    selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: { type: 'hold', amount: '0' } }), {})
+  );
   const TMinus = 60;
   const MaxRound = 10;
   const [counter, setCounter] = useState(TMinus);
@@ -68,7 +67,7 @@ const CompetitionLayout = () => {
       if (counter > 0 && !gameEnd) {
         setCounter(counter - 1);
       } else if (counter === 0 && !gameEnd) {
-        if (buyAmount || sellAmount || hold)
+        if (selectedTrades.length > 0)
           handleSubmit();
         else
           handleNextRound();
@@ -111,57 +110,34 @@ const CompetitionLayout = () => {
     }
   };
 
-  const handleBuySellChange = (stock, type, amount) => {
-    setSelectedTrades((prevTrades) => ({
-      ...prevTrades,
-      [stock]: { type, amount }
-    }));
-  };
-
-  const handleHoldChange = (stock) => {
-    setSelectedTrades((prevTrades) => ({
-      ...prevTrades,
-      [stock]: { type: 'hold', amount: '' }
-    }));
-  };
-
-  const handleClear = () => {
-    setSelectedTrades({});
-    setBuyAmount('');
-    setSellAmount('');
-    setHold(false);
-  };
-
   const handleSubmit = async () => {
-  const date = currentDate.toISOString();
+    console.log('handleSubmit:');
 
-  for (const stock of Object.keys(selectedTrades)) {
-    const { type, amount } = selectedTrades[stock];
+    const date = currentDate.toISOString();
 
-    const transaction = {
-      user_id: userId,
-      stock_symbol: stock,
-      transaction_type: type,
-      amount: parseFloat(amount),
-      date: date
-    };
+    for (const stock of Object.keys(selectedTrades)) {
+      const { type, amount } = selectedTrades[stock];
 
-    try {
-      await axios.post('http://localhost:5000/api/transactions', transaction);
-      console.log('Transaction submitted:', transaction);
-    } catch (error) {
-      console.error('Error submitting transaction:', error);
+      const transaction = {
+        user_id: userId,
+        stock_symbol: stock,
+        transaction_type: type,
+        amount: parseFloat(amount),
+        date: date
+      };
+
+      try {
+        await axios.post('http://localhost:5000/api/transactions', transaction);
+        console.log('Transaction submitted:', transaction);
+      } catch (error) {
+        console.error('Error submitting transaction:', error);
+      }
     }
-  }
 
-  setBuyAmount('');
-  setSellAmount('');
-  setHold(false);
-  setSelectedTrades({});
-  setRefreshHistory(!refreshHistory); // 触发交易历史刷新
-  handleNextRound();
-};
-
+    setSelectedTrades(selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: { type: 'hold', amount: '0' } }), {}));
+    setRefreshHistory(prev => !prev); // 触发交易历史刷新
+    handleNextRound();
+  };
 
   const handleNextRound = () => {
     // 更新游戏日期逻辑，每次增加n个交易日
@@ -213,7 +189,7 @@ const CompetitionLayout = () => {
             <div className="market-display d-flex" style={{ flexDirection: 'row', alignItems: 'end' }}>
               <div className="stock-info" style={{ backgroundColor: 'transparent', flex: '1', padding: '1em' }}>
                 <div style={{ backgroundColor: 'white', color: 'black' }}>
-                  <CandlestickChart data={CandlestickChartData} stockName={selectedStock}/>
+                  <CandlestickChart data={CandlestickChartData} stockName={selectedStock} />
                 </div>
               </div>
               <div className="report" style={{ flex: "1", padding: '1em' }}>
@@ -236,7 +212,11 @@ const CompetitionLayout = () => {
               </div>
             </div>
             <div className="bottom-section d-flex justify-content-between">
-              <StockTradeComponent initialBalance={initialBalance} userId={userId} selectedStock={selectedStockList} />
+              <StockTradeComponent selectedTrades={selectedTrades} setSelectedTrades={setSelectedTrades}
+                initialBalance={initialBalance}
+                userId={userId}
+                selectedStock={selectedStockList}
+                handleSubmit={handleSubmit} />
               <div className="ranking">
                 <h3>Standings:</h3>
                 <table>
@@ -263,11 +243,8 @@ const CompetitionLayout = () => {
               </div>
             </div>
             <div className="history-section">
-              <select>
-                <option value="1">1</option>
-                {/* Other options */}
-              </select>
-              <TradeHistory userId={userId} refreshHistory={refreshHistory} selectedStock={selectedStockList} />            </div>
+              <TradeHistory userId={userId} refreshHistory={refreshHistory} selectedStock={selectedStockList} />
+            </div>
           </div>
         </div>
       </div>

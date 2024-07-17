@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const StockTradeComponent = ({ initialBalance, userId, selectedStock }) => {
-  const [selectedTrades, setSelectedTrades] = useState({});
+const StockTradeComponent = ({selectedTrades, setSelectedTrades, initialBalance, userId, selectedStock, handleSubmit }) => {
   const [balance, setBalance] = useState(initialBalance);
   const [remainingBalance, setRemainingBalance] = useState(initialBalance);
   const [gameEnd, setGameEnd] = useState(false);
@@ -10,7 +9,7 @@ const StockTradeComponent = ({ initialBalance, userId, selectedStock }) => {
     // 初始化默认选择为hold
     const initialTrades = {};
     selectedStock.forEach(stock => {
-      initialTrades[stock] = { type: 'hold', amount: '' };
+      initialTrades[stock] = { type: 'hold', amount: '0' };
     });
     setSelectedTrades(initialTrades);
   }, [selectedStock]);
@@ -27,45 +26,16 @@ const StockTradeComponent = ({ initialBalance, userId, selectedStock }) => {
   const handleHoldChange = (stock) => {
     setSelectedTrades((prevTrades) => ({
       ...prevTrades,
-      [stock]: { type: 'hold', amount: '' }
+      [stock]: { type: 'hold', amount: '0' }
     }));
   };
 
   const handleClear = () => {
     const clearedTrades = {};
     selectedStock.forEach(stock => {
-      clearedTrades[stock] = { type: 'hold', amount: '' };
+      clearedTrades[stock] = { type: 'hold', amount: '0' };
     });
     setSelectedTrades(clearedTrades);
-  };
-
-  const handleSubmit = () => {
-    console.log('Submitted trades:', selectedTrades);
-
-    const transactions = Object.keys(selectedTrades).map(stock => ({
-      user_id: userId,
-      stock_symbol: stock,
-      transaction_type: selectedTrades[stock].type,
-      amount: parseInt(selectedTrades[stock].amount) || 0,
-      date: new Date().toISOString()  // 当前时间
-    }));
-
-    transactions.forEach(transaction => {
-      fetch('http://localhost:5000/api/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(transaction)
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Transaction created:', data);
-      })
-      .catch(error => {
-        console.error('Error creating transaction:', error);
-      });
-    });
   };
 
   return (
