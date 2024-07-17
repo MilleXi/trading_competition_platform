@@ -3,17 +3,19 @@ import axios from 'axios';
 import '../../css/TradeHistory.css';  // 导入CSS文件
 
 const TradeHistory = ({ userId, refreshHistory, selectedStock }) => {
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState({});
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/transactions`, {
+        const response = await axios.get('http://localhost:5000/api/transactions', {
           params: {
-            user_id: userId
-          }
+            user_id: userId,
+            stock_symbols: selectedStock.join(','),
+          },
         });
-        const filteredHistory = response.data.filter(trade => selectedStock.includes(trade.stock_symbol));
-        setHistory(filteredHistory);
+        console.log('history response data:', response.data);
+        setHistory(response.data.transactions_by_date);
       } catch (error) {
         console.error('Error fetching trade history:', error);
       }
@@ -21,6 +23,9 @@ const TradeHistory = ({ userId, refreshHistory, selectedStock }) => {
 
     fetchHistory();
   }, [userId, refreshHistory, selectedStock]);
+
+  console.log('history:', history);
+  console.log('selectedStock:', selectedStock);
 
   return (
     <div className="history-section">
@@ -36,16 +41,22 @@ const TradeHistory = ({ userId, refreshHistory, selectedStock }) => {
           </tr>
         </thead>
         <tbody>
-          {history.length > 0 ? (
-            history.map((trade, index) => (
+          {Object.keys(history).length > 0 ? (
+            Object.keys(history).map((date, index) => (
               <tr key={index}>
-                <td>{new Date(trade.date).toLocaleDateString()}</td>
-                {selectedStock.map((stock, idx) => (
-                  <td key={idx}>
-                    {trade.stock_symbol === stock ? `${trade.transaction_type}: ${trade.amount}` : ''}
-                  </td>
-                ))}
-                <td>{/* Calculate total value here based on trade data */}</td>
+                <td>{new Date(date).toLocaleDateString()}</td>
+                {selectedStock.map((stock, idx) => {
+                  const tradeDetails = history[date][stock] || [];
+                  const tradeInfo = tradeDetails.map(trade => `${trade.transaction_type}: ${trade.amount}`).join(', ');
+
+                  return <td key={idx}>{tradeInfo}</td>;
+                })}
+                <td>
+                  {selectedStock.reduce((total, stock) => {
+                    const tradeDetails = history[date][stock] || [];
+                    return total + tradeDetails.reduce((subtotal, trade) => subtotal + (trade.amount || 0), 0);
+                  }, 0)}
+                </td>
               </tr>
             ))
           ) : (

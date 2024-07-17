@@ -5,7 +5,7 @@ db = SQLAlchemy()
 
 
 class StockData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     symbol = db.Column(db.String(10), nullable=False)
     date = db.Column(db.Date, nullable=False)
     open = db.Column(db.Float, nullable=False)
@@ -29,7 +29,7 @@ class StockData(db.Model):
 
 
 class Transaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, nullable=False)
     stock_symbol = db.Column(db.String(10), nullable=False)
     transaction_type = db.Column(db.String(10), nullable=False)  # "buy" or "sell"
@@ -38,7 +38,7 @@ class Transaction(db.Model):
 
 
 class GameInfo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     game_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     balance = db.Column(db.Float, nullable=False)

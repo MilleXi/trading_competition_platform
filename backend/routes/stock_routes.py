@@ -106,9 +106,9 @@ def get_stored_stock_data():
         query = query.filter(StockData.date <= end_date)
 
     stocks = query.all()
-    print("query:", query)
+    # print("query:", query)
 
-    print("Query result:", stocks)
+    # print("Query result:", stocks)
 
     stock_data = [{
         'symbol': stock.symbol,
@@ -133,7 +133,7 @@ def get_stored_stock_data():
         'beta': round(stock.beta, 2)
     } for stock in stocks]
 
-    print("Returned data:", stock_data)
+    # print("Returned data:", stock_data)
 
     return jsonify(stock_data)
 
