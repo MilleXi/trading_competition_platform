@@ -38,13 +38,23 @@ class Transaction(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+
 class GameInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     game_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
-    balance = db.Column(db.Float, nullable=False)
+    cash = db.Column(db.Float, nullable=False)  # 当前剩余的现金
+    portfolio_value = db.Column(db.Float, nullable=False)  # 股票的总价值
+    total_assets = db.Column(db.Float, nullable=False)  # 总资产（现金 + 股票）
+    stocks = db.Column(db.JSON, nullable=False)  # 持有的股票数量，以字典形式存储
     score = db.Column(db.Integer, nullable=False)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def update_assets(self):
+        self.total_assets = self.cash + self.portfolio_value
+        self.last_updated = datetime.utcnow()
+        db.session.commit()
+
 
 
 class TradeLog(db.Model):
