@@ -33,6 +33,10 @@
   z-index: 0 !important;
 }
 
+.canvasjs-chart-credit {
+  display: none !important;
+}
+
 /* 财务报表等数据图 */
 
 
