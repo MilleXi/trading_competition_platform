@@ -2,15 +2,17 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../../css/TradeHistory.css';  // 导入CSS文件
 
-const TradeHistory = ({ userId, refreshHistory, selectedStock }) => {
+const TradeHistory = ({ userId, refreshHistory, selectedStock, gameId}) => {
   const [history, setHistory] = useState({});
 
   useEffect(() => {
     const fetchHistory = async () => {
+      console.log("fetching history")
       try {
         const response = await axios.get('http://localhost:8000/api/transactions', {
           params: {
             user_id: userId,
+            game_id: gameId,
             stock_symbols: selectedStock.join(','),
           },
         });
