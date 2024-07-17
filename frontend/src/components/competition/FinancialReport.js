@@ -28,7 +28,7 @@ const FinancialReport = ({
   useEffect(() => {
     const fetchStockData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/stored_stock_data', {
+        const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
           params: {
             symbol: selectedStock,
             start_date: '2021-01-01',

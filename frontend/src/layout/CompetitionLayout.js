@@ -41,7 +41,7 @@ const CompetitionLayout = () => {
   useEffect(() => {
     const fetchStockData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/stored_stock_data', {
+        const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
           params: {
             symbol: selectedStock,
             start_date: '2021-01-01',
@@ -113,7 +113,7 @@ const CompetitionLayout = () => {
     }
 
     try {
-        const response = await axios.post('http://localhost:5000/api/run_strategy', {
+        const response = await axios.post('http://localhost:8000/api/run_strategy', {
           tickers: selectedTickers,
           game_id: gameId,
         });
@@ -126,7 +126,7 @@ const CompetitionLayout = () => {
             model: "LSTM",
             game_id: gameId
           };
-          await axios.post('http://localhost:5000/api/save_trade_log', logEntry);
+          await axios.post('http://localhost:8000/api/save_trade_log', logEntry);
         }
 
       } catch (error) {
@@ -151,7 +151,7 @@ const CompetitionLayout = () => {
       };
 
       try {
-        await axios.post('http://localhost:5000/api/transactions', transaction);
+        await axios.post('http://localhost:8000/api/transactions', transaction);
         console.log('Transaction submitted:', transaction);
       } catch (error) {
         console.error('Error submitting transaction:', error);

@@ -8,7 +8,7 @@ const TradeHistory = ({ userId, refreshHistory, selectedStock }) => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/transactions', {
+        const response = await axios.get('http://localhost:8000/api/transactions', {
           params: {
             user_id: userId,
             stock_symbols: selectedStock.join(','),
