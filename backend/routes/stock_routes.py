@@ -7,6 +7,13 @@ from utils.db_utils import db, StockData
 import yfinance as yf
 import pandas as pd
 
+from flask import Flask
+from flask_cors import CORS, cross_origin
+
+app = Flask(__name__)
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+
+
 
 stock_bp = Blueprint('stock', __name__)
 
@@ -87,12 +94,13 @@ def download_stock_data():
 
 
 @stock_bp.route('/stored_stock_data', methods=['GET'])
+@cross_origin()
 def get_stored_stock_data():
     symbol = request.args.get('symbol')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    print(f"Received request with params - symbol: {symbol}, start_date: {start_date}, end_date: {end_date}")
+    # print(f"Received request with params - symbol: {symbol}, start_date: {start_date}, end_date: {end_date}")
 
     query = StockData.query
     if symbol:

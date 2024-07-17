@@ -3,7 +3,14 @@ import os
 import json
 import pandas as pd
 from datetime import datetime
+import yfinance as yf
 from utils.db_utils import db, GameInfo
+
+from flask import Flask
+from flask_cors import CORS, cross_origin
+
+app = Flask(__name__)
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 game_bp = Blueprint('game', __name__)
 RECORDS_DIR = 'records'
@@ -11,6 +18,7 @@ PREDICTIONS_DIR = 'predictions'
 
 
 @game_bp.route('/game_info', methods=['GET'])
+@cross_origin()
 def get_game_info():
     game_id = request.args.get('game_id')
     if not game_id:
@@ -32,6 +40,7 @@ def get_game_info():
 
 
 @game_bp.route('/game_info', methods=['POST'])
+@cross_origin()
 def store_game_info():
     game_info_data = request.get_json()
     game_info = GameInfo(
@@ -47,6 +56,7 @@ def store_game_info():
 
 
 @game_bp.route('/predictions/<stock>', methods=['GET'])
+@cross_origin()
 def get_predictions(stock):
     file_path = os.path.join(PREDICTIONS_DIR, f'{stock}.pkl')
     if os.path.exists(file_path):
@@ -55,3 +65,20 @@ def get_predictions(stock):
         return predictions.to_json(orient='records')
     else:
         return jsonify({'error': 'Prediction file not found'}), 404
+
+
+@game_bp.route('/next_trading_day', methods=['POST'])
+@cross_origin()
+def next_trading_day():
+  data = request.json
+  current_date = pd.to_datetime(data['current_date'])
+  n = data.get('n', 1)
+
+  # 获取所有交易日数据
+  df = yf.download("SPY", start="2015-01-01", end="2025-12-31")  # 使用SPY代表标准交易日
+  trading_days = df.index
+
+  # 计算下一个交易日
+  next_trading_day = trading_days[trading_days > current_date][n - 1]
+
+  return jsonify({"next_trading_day": next_trading_day.strftime('%Y-%m-%d')})

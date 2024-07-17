@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from flask import Flask, Blueprint, jsonify, request, current_app
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from utils.db_utils import db, Transaction
 from datetime import datetime
 from collections import defaultdict
@@ -16,6 +16,7 @@ transaction_bp = Blueprint('transaction', __name__)
 
 # 获取所有交易记录
 @transaction_bp.route('/transactions', methods=['GET'])
+@cross_origin()
 def get_transactions():
     print('arg',request.args)
     user_id = request.args.get('user_id')
@@ -67,6 +68,7 @@ def get_transactions():
 
 # 创建新的交易记录
 @transaction_bp.route('/transactions', methods=['POST'])
+@cross_origin()
 def create_transaction():
     data = request.get_json()
     try:
@@ -88,6 +90,7 @@ def create_transaction():
 
 # 更新交易记录
 @transaction_bp.route('/transactions/<int:transaction_id>', methods=['PUT'])
+@cross_origin()
 def update_transaction(transaction_id):
     data = request.get_json()
     transaction = Transaction.query.get_or_404(transaction_id)
@@ -107,6 +110,7 @@ def update_transaction(transaction_id):
 
 # 删除交易记录
 @transaction_bp.route('/transactions/<int:transaction_id>', methods=['DELETE'])
+@cross_origin()
 def delete_transaction(transaction_id):
     transaction = Transaction.query.get_or_404(transaction_id)
     db.session.delete(transaction)

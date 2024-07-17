@@ -3,6 +3,7 @@ from flask_cors import CORS
 from routes.stock_routes import stock_bp
 from routes.transaction_routes import transaction_bp
 from routes.game_routes import game_bp
+from routes.strategy_routes import strategy_bp
 from utils.db_utils import db, init_db
 import os
 import json
@@ -23,6 +24,7 @@ def create_app():
     app.register_blueprint(stock_bp, url_prefix='/api')
     app.register_blueprint(transaction_bp, url_prefix='/api')
     app.register_blueprint(game_bp, url_prefix='/api')
+    app.register_blueprint(strategy_bp, url_prefix='/api')
 
     # 确保数据目录存在
     os.makedirs('data', exist_ok=True)
@@ -43,4 +45,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8000)

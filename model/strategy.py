@@ -12,7 +12,7 @@ start_test_date = datetime(2023, 1, 1)
 end_test_date = datetime(2024, 1, 1)
 tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA',]  # 仅做示例
 
-directory_path = 'prediction/LSTM'
+directory_path = '../backend/predictions/LSTM'
 all_predictions = {}
 for ticker in tickers:
     file_path = os.path.join(directory_path, f'{ticker}_predictions.pkl')
@@ -22,7 +22,6 @@ for ticker in tickers:
         print(f'Loaded predictions for {ticker} from {file_path}')
     except FileNotFoundError:
         print(f'File not found: {file_path}')
-
 
 
 class MyStrategy:
