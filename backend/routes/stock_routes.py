@@ -7,6 +7,12 @@ from utils.db_utils import db, StockData
 import yfinance as yf
 import pandas as pd
 
+from flask import Flask
+from flask_cors import CORS
+app = Flask(__name__)
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+
+
 
 stock_bp = Blueprint('stock', __name__)
 
@@ -92,7 +98,7 @@ def get_stored_stock_data():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    print(f"Received request with params - symbol: {symbol}, start_date: {start_date}, end_date: {end_date}")
+    # print(f"Received request with params - symbol: {symbol}, start_date: {start_date}, end_date: {end_date}")
 
     query = StockData.query
     if symbol:
@@ -106,9 +112,9 @@ def get_stored_stock_data():
         query = query.filter(StockData.date <= end_date)
 
     stocks = query.all()
-    print("query:", query)
+    # print("query:", query)
 
-    print("Query result:", stocks)
+    # print("Query result:", stocks)
 
     stock_data = [{
         'symbol': stock.symbol,
@@ -133,7 +139,7 @@ def get_stored_stock_data():
         'beta': round(stock.beta, 2)
     } for stock in stocks]
 
-    print("Returned data:", stock_data)
+    # print("Returned data:", stock_data)
 
     return jsonify(stock_data)
 

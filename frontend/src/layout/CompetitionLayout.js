@@ -14,6 +14,7 @@ import TradeHistory from '../components/competition/TradeHistory';
 const CompetitionLayout = () => {
   const initialBalance = 100000;
   const startDate = new Date('2022-01-01');
+  const gameId = 1;
   const [marketData, setMarketData] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [currentDate, setCurrentDate] = useState(startDate);
@@ -102,12 +103,34 @@ const CompetitionLayout = () => {
     });
   };
 
-  const confirmSelection = () => {
+  const confirmSelection = async () => {
     if (selectedTickers.length === 3) {
       setSelectedStockList(selectedTickers);
       setSelectedStock(selectedTickers[0]); // 默认选择第一个股票
       closeModal();
+      console.log(1111111111111)
     }
+
+    try {
+        const response = await axios.post('http://localhost:5000/api/run_strategy', {
+          tickers: selectedTickers,
+          game_id: gameId,
+        });
+        console.log('Strategy result:', response.data);
+
+        // 保存结果到数据库
+        for (const record of response.data.trade_log) {
+          const logEntry = {
+            ...record,
+            model: "LSTM",
+            game_id: gameId
+          };
+          await axios.post('http://localhost:5000/api/save_trade_log', logEntry);
+        }
+
+      } catch (error) {
+        console.error('Error running strategy:', error);
+      }
   };
 
   const handleSubmit = async () => {
