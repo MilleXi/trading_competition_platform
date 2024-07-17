@@ -10,11 +10,13 @@ import CandlestickChart from '../components/competition/CandlestickChart';
 import StockTradeComponent from '../components/competition/StockTrade';
 import FinancialReport from '../components/competition/FinancialReport';
 import TradeHistory from '../components/competition/TradeHistory';
+import { v4 as uuidv4 } from 'uuid';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
   const startDate = new Date('2022-01-03');
-  const gameId = 1;
+  const gameId = uuidv4();
+  const modelList = ['LSTM']
   const [marketData, setMarketData] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [currentDate, setCurrentDate] = useState(startDate);
