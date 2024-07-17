@@ -21,16 +21,20 @@ PREDICTIONS_DIR = 'predictions'
 @cross_origin()
 def get_game_info():
     game_id = request.args.get('game_id')
-    if not game_id:
-        return jsonify({'error': 'Game ID is required'}), 400
+    user_id = request.args.get('user_id')
+    if not game_id or not user_id:
+        return jsonify({'error': 'Game ID and User ID are required'}), 400
 
-    game_infos = GameInfo.query.filter_by(game_id=game_id).all()
+    game_infos = GameInfo.query.filter_by(game_id=game_id, user_id=user_id).all()
     game_info_list = [
         {
             'id': game_info.id,
             'game_id': game_info.game_id,
             'user_id': game_info.user_id,
-            'balance': game_info.balance,
+            'cash': game_info.cash,
+            'portfolio_value': game_info.portfolio_value,
+            'total_assets': game_info.total_assets,
+            'stocks': game_info.stocks,
             'score': game_info.score,
             'last_updated': game_info.last_updated.isoformat()
         }
@@ -43,10 +47,14 @@ def get_game_info():
 @cross_origin()
 def store_game_info():
     game_info_data = request.get_json()
+    print("game_info_data:", game_info_data)
     game_info = GameInfo(
         game_id=game_info_data['game_id'],
         user_id=game_info_data['user_id'],
-        balance=game_info_data['balance'],
+        cash=game_info_data['cash'],
+        portfolio_value=game_info_data['portfolio_value'],
+        total_assets=game_info_data['cash'] + game_info_data['portfolio_value'],
+        stocks=game_info_data['stocks'],
         score=game_info_data['score'],
         last_updated=datetime.utcnow()
     )
