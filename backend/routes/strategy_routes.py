@@ -16,7 +16,8 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import MinMaxScaler
 
 from flask import Flask
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
@@ -274,6 +275,7 @@ class ShortStrategy(MyStrategy):
 
 
 @strategy_bp.route('/run_strategy', methods=['POST'])
+@cross_origin()
 def run_strategy():
   data = request.json
   tickers = data['tickers']
@@ -309,6 +311,7 @@ def run_strategy():
 
 
 @strategy_bp.route('/save_trade_log', methods=['POST'])
+@cross_origin()
 def save_trade_log():
   data = request.json
   date_str = data['date']

@@ -8,7 +8,8 @@ import yfinance as yf
 import pandas as pd
 
 from flask import Flask
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
@@ -93,6 +94,7 @@ def download_stock_data():
 
 
 @stock_bp.route('/stored_stock_data', methods=['GET'])
+@cross_origin()
 def get_stored_stock_data():
     symbol = request.args.get('symbol')
     start_date = request.args.get('start_date')
