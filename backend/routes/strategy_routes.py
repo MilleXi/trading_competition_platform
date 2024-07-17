@@ -346,3 +346,32 @@ def save_trade_log():
   db.session.add(new_record)
   db.session.commit()
   return jsonify({"message": "Trade log saved successfully."})
+
+
+@strategy_bp.route('/get_trade_log', methods=['GET'])
+@cross_origin()
+def get_trade_log():
+    game_id = request.args.get('game_id')
+    model = request.args.get('model')
+    date_str = request.args.get('date')
+
+    try:
+        date = datetime.strptime(date_str, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({"error": "Date format error"}), 400
+
+    trade_log = TradeLog.query.filter_by(game_id=game_id, model=model, date=date).first()
+
+    if not trade_log:
+        return jsonify({"error": "Trade log not found"}), 404
+
+    return jsonify({
+        "date": trade_log.date.strftime('%Y-%m-%d'),
+        "balance": trade_log.balance,
+        "earning": trade_log.earning,
+        "portfolio": trade_log.portfolio,
+        "change": trade_log.change,
+        "earnings_per_stock": trade_log.earnings_per_stock,
+        "model": trade_log.model,
+        "game_id": trade_log.game_id
+    })

@@ -43,7 +43,8 @@
     "react-router-dom": "^6.23.1",
     "recharts": "^2.12.7",
     "redux": "5.0.1",
-    "simplebar-react": "^3.2.5"
+    "simplebar-react": "^3.2.5",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
