@@ -12,14 +12,13 @@ import FinancialReport from '../components/competition/FinancialReport';
 import TradeHistory from '../components/competition/TradeHistory';
 import { v4 as uuidv4 } from 'uuid';
 import App from '../App';
-import zIndex from '@mui/material/styles/zIndex';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
   const startDate = new Date('2023-01-03');
   const gameIdRef = useRef(uuidv4());
   const gameId = gameIdRef.current;
-  const modelList = ['LSTM']
+  const modelList = ['LSTM'];
   const [currentRound, setCurrentRound] = useState(1);
   const [currentDate, setCurrentDate] = useState(startDate);
   const [selectedStock, setSelectedStock] = useState('AAPL');
@@ -28,6 +27,12 @@ const CompetitionLayout = () => {
   const [selectedTrades, setSelectedTrades] = useState(
     selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: { type: 'hold', amount: '0' } }), {})
   );
+  const [cash, setCash] = useState(initialBalance);
+  const [portfolioValue, setPortfolioValue] = useState(0);
+  const [totalAssets, setTotalAssets] = useState(initialBalance);
+  const [aiCash, setAiCash] = useState(initialBalance);
+  const [aiPortfolioValue, setAiPortfolioValue] = useState(0);
+  const [aiTotalAssets, setAiTotalAssets] = useState(initialBalance);
   const TMinus = 60;
   const MaxRound = 10;
   const [counter, setCounter] = useState(TMinus);
@@ -72,9 +77,55 @@ const CompetitionLayout = () => {
     fetchStockData();
   }, [selectedStock]);
 
-  console.log('stockData:', stockData);
-  console.log('selectedStock:', selectedStock);
-  console.log('CandlestickChartData:', CandlestickChartData);
+  useEffect(() => {
+    console.log("StockData changed:", stockData);
+  }, [stockData]);
+
+  useEffect(() => {
+    const initializeGameInfo = async () => {
+      try {
+        const initialData = {
+          game_id: gameId,
+          user_id: userId,
+          cash: initialBalance,
+          portfolio_value: 0,
+          total_assets: initialBalance,
+          stocks: {},
+          score: 0
+        };
+        const aiData = {
+          game_id: gameId,
+          user_id: 'ai',
+          cash: initialBalance,
+          portfolio_value: 0,
+          total_assets: initialBalance,
+          stocks: {},
+          score: 0
+        };
+        await axios.post('http://localhost:8000/api/game_info', initialData);
+        await axios.post('http://localhost:8000/api/game_info', aiData);
+
+        // 初始化交易记录
+        const initialTransaction = {
+          game_id: gameId,
+          user_id: 'ai',
+          stock_symbol: 'INIT',
+          transaction_type: 'init',
+          amount: 0,
+          price: 0,
+          date: startDate.toISOString()
+        };
+        await saveTransaction(initialTransaction);
+
+        // 立即运行AI策略，确保有初始交易记录
+        await runAIStrategy();
+      } catch (error) {
+        console.error('Error initializing game info:', error);
+      }
+    };
+
+    initializeGameInfo();
+  }, []);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -146,13 +197,142 @@ const CompetitionLayout = () => {
     }
   };
 
+  const saveTransaction = async (transaction) => {
+    try {
+      await axios.post('http://localhost:8000/api/transactions', transaction);
+      console.log('Transaction saved:', transaction);
+    } catch (error) {
+      console.error('Error saving transaction:', error);
+    }
+  };
+
+  const runAIStrategy = async () => {
+    const date = currentDate.toISOString().split('T')[0];
+    const aiInfo = await fetchAiInfo();
+
+    try {
+        const aiResponse = await axios.get('http://localhost:8000/api/get_trade_log', {
+            params: {
+                game_id: gameId,
+                model: 'LSTM',
+                date: date,
+            }
+        });
+
+        if (aiResponse.data) {
+            console.log("AI Strategy:", aiResponse.data);
+
+            // 直接使用从后端获取的ai策略数据
+            const strategy = aiResponse.data.change || {};
+            for (const [stock, amount] of Object.entries(strategy)) {
+                const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
+                    params: {
+                        symbol: stock,
+                        start_date: date,
+                        end_date: date
+                    }
+                });
+                const filteredData = response.data;
+
+                if (filteredData.length === 0) {
+                    console.error(`Stock info for ${stock} on ${date} not found`);
+                    continue;
+                }
+
+                const stockInfo = filteredData[0];
+                console.log("AI stockInfo:", stockInfo);
+
+                const aiTransaction = {
+                    game_id: gameId,
+                    user_id: 'ai',
+                    stock_symbol: stock,
+                    transaction_type: amount > 0 ? 'buy' : 'sell',
+                    amount: Math.abs(amount),
+                    price: stockInfo.open,
+                    date: currentDate.toISOString()
+                };
+
+                await saveTransaction(aiTransaction);
+
+                if (amount > 0) {
+                    aiInfo.cash -= stockInfo.open * amount;
+                    aiInfo.stocks[stock] = (aiInfo.stocks[stock] || 0) + amount;
+                } else {
+                    aiInfo.cash += stockInfo.open * Math.abs(amount);
+                    aiInfo.stocks[stock] = (aiInfo.stocks[stock] || 0) - Math.abs(amount);
+                }
+            }
+
+            const aiPortfolioValue = await selectedStockList.reduce(async (accPromise, stock) => {
+                const acc = await accPromise;
+                const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
+                    params: {
+                        symbol: stock,
+                        start_date: date,
+                        end_date: date
+                    }
+                });
+                const filteredData = response.data;
+
+                if (filteredData.length === 0) {
+                    console.error(`Stock info for ${stock} on ${date} not found`);
+                    return acc;
+                }
+
+                const stockInfo = filteredData[0];
+                return acc + (aiInfo.stocks[stock] || 0) * stockInfo.close;
+            }, Promise.resolve(0));
+
+            aiInfo.portfolio_value = aiPortfolioValue;
+            aiInfo.total_assets = aiInfo.cash + aiInfo.portfolio_value;
+
+            try {
+                await axios.post('http://localhost:8000/api/game_info', aiInfo);
+            } catch (error) {
+                console.error('Error updating AI info:', error);
+            }
+
+            setAiStrategy(aiResponse.data); // 更新状态以触发其他依赖此状态的UI变化
+            setShowStrategyModal(true);
+
+            // 更新AI的状态
+            setAiCash(aiInfo.cash);
+            setAiPortfolioValue(aiInfo.portfolio_value);
+            setAiTotalAssets(aiInfo.total_assets);
+        } else {
+            console.error('No AI strategy found');
+        }
+    } catch (error) {
+        console.error('Error fetching AI strategy:', error);
+    }
+};
+
+
   const handleSubmit = async () => {
     console.log('handleSubmit:');
+    const date = currentDate.toISOString().split('T')[0]; // 确保date是一个字符串
 
-    const date = currentDate.toISOString();
+    const userInfo = await fetchUserInfo();
 
     for (const stock of Object.keys(selectedTrades)) {
       const { type, amount } = selectedTrades[stock];
+      const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
+        params: {
+          symbol: stock,
+          start_date: date,
+          end_date: date
+        }
+      });
+      const filteredData = response.data;
+
+      if (filteredData.length === 0) {
+        console.error(`Stock info for ${stock} on ${date} not found`);
+        continue;
+      }
+
+      const stockInfo = filteredData[0];
+      console.log("symbol:", stock);
+      console.log("StockInfo:", stockInfo);
 
       const transaction = {
         game_id: gameId,
@@ -160,60 +340,94 @@ const CompetitionLayout = () => {
         stock_symbol: stock,
         transaction_type: type,
         amount: parseFloat(amount),
-        date: date,
+        price: stockInfo.open,
+        date: currentDate.toISOString()
       };
 
-      try {
-        await axios.post('http://localhost:8000/api/transactions', transaction);
-        console.log('Transaction submitted:', transaction);
-      } catch (error) {
-        console.error('Error submitting transaction:', error);
+      await saveTransaction(transaction);
+
+      if (type === 'buy') {
+        userInfo.cash -= stockInfo.open * amount;
+        userInfo.stocks[stock] = (userInfo.stocks[stock] || 0) + parseFloat(amount);
+      } else if (type === 'sell') {
+        userInfo.cash += stockInfo.open * amount;
+        userInfo.stocks[stock] = (userInfo.stocks[stock] || 0) - parseFloat(amount);
       }
     }
 
-    // 获取AI策略
-    try {
-      const aiResponse = await axios.get('http://localhost:8000/api/get_trade_log', {
+    const portfolioValue = await selectedStockList.reduce(async (accPromise, stock) => {
+      const acc = await accPromise;
+      console.log("stock", stock);
+      console.log("date", date);
+      const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
         params: {
-          game_id: gameId,
-          model: 'LSTM',
-          date: date.split('T')[0],
+          symbol: stock,
+          start_date: date,
+          end_date: date
         }
       });
-      // 传输ai的交易记录
-      if (aiResponse.data) {
-        console.log("AI Strategy:", aiResponse.data)
-        setAiStrategy(aiResponse.data);
+      const filteredData = response.data;
 
-        const aiTransactions = Object.entries(aiResponse.data.change).map(([stock, amount]) => ({
-          game_id: gameId,
-          user_id: 'ai', // 或者用一个特定的AI用户ID
-          stock_symbol: stock,
-          transaction_type: amount > 0 ? 'buy' : 'sell',
-          amount: Math.abs(amount),
-          date: date,
-        }));
-        for (const transaction of aiTransactions) {
-          try {
-            await axios.post('http://localhost:8000/api/transactions', transaction);
-            console.log('AI Transaction submitted:', transaction);
-          } catch (error) {
-            console.error('Error submitting AI transaction:', error);
-          }
-        }
-
-        setShowStrategyModal(true); // 显示策略模态窗口
-      } else {
-        console.error('No AI strategy found');
+      if (filteredData.length === 0) {
+        console.error(`Stock info for ${stock} on ${date} not found`);
+        return acc;
       }
+
+      const stockInfo = filteredData[0];
+      console.log("stockInfo:", stockInfo);
+      return acc + (userInfo.stocks[stock] || 0) * stockInfo.close;
+    }, Promise.resolve(0));
+
+    userInfo.portfolio_value = portfolioValue;
+    userInfo.total_assets = userInfo.cash + userInfo.portfolio_value;
+
+    // 更新前端显示的余额值
+    setCash(userInfo.cash);
+    setPortfolioValue(userInfo.portfolio_value);
+    setTotalAssets(userInfo.total_assets);
+
+    // 先保存用户的game_info
+    try {
+      await axios.post('http://localhost:8000/api/game_info', userInfo);
     } catch (error) {
-      console.error('Error fetching AI strategy:', error);
+      console.error('Error updating user info:', error);
     }
 
-    setStopCounter(true);
+    // 保存AI的交易记录
+    await runAIStrategy();
 
+    setStopCounter(true);
   };
 
+  const fetchUserInfo = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/game_info', {
+        params: {
+          game_id: gameId,
+          user_id: userId
+        }
+      });
+      return response.data[0]; // 假设返回的第一个是需要的用户信息
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      return null;
+    }
+  };
+
+  const fetchAiInfo = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/game_info', {
+        params: {
+          game_id: gameId,
+          user_id: 'ai' // 假设AI用户ID为 'ai'
+        }
+      });
+      return response.data[0]; // 假设返回的第一个是需要的AI信息
+    } catch (error) {
+      console.error('Error fetching AI info:', error);
+      return null;
+    }
+  };
 
   const handleNextRound = async () => {
     // 更新游戏日期逻辑，每次增加n个交易日
@@ -258,6 +472,12 @@ const CompetitionLayout = () => {
             <div>Mode: {difficulty}</div>
             <div className="d-flex justify-content-between align-items-center w-100 mb-3">
               <div>Current Date: {currentDate.toISOString().split('T')[0]}</div>
+              <div>Cash: ${cash.toFixed(2)}</div>
+              <div>Portfolio Value: ${portfolioValue.toFixed(2)}</div>
+              <div>Total Assets: ${totalAssets.toFixed(2)}</div>
+              <div>AI Cash: ${aiCash.toFixed(2)}</div>
+              <div>AI Portfolio Value: ${aiPortfolioValue.toFixed(2)}</div>
+              <div>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
             </div>
           </div>
           <div className="top-bar d-flex justify-content-between align-items-center">
