@@ -579,7 +579,7 @@ const CompetitionLayout = () => {
           </div>
         </div>
       </div>
-    
+
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks"
         style={{
             content: {
@@ -622,7 +622,7 @@ const CompetitionLayout = () => {
             ))}
         </Grid>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-            <button 
+            <button
             onClick={confirmSelection}
             style={{
                 padding: '10px 20px',
