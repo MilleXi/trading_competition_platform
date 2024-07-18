@@ -772,7 +772,7 @@ const CompetitionLayout = () => {
             {aiStrategy && aiStrategy.change ? (
             Object.entries(aiStrategy.change).map(([stock, change]) => (
                 <div key={stock} style={{ marginBottom: '10px' }}>
-                <p>{stock}: {change}</p>
+                <p>{stock}: {change > 0 ? `buy ${change}` : (change === 0 ? `hold ${change}` : `sell ${Math.abs(change)}`)}</p>
                 </div>
             ))
             ) : (
