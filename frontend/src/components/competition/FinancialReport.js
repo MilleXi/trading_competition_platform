@@ -75,7 +75,7 @@ const FinancialReport = ({
 
   const attributeLabels = [
     'Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA10', 'MA20', 'RSI', 'MACD',
-    'VWAP', 'SMA', 'Std Dev', 'Upper Band', 'Lower Band', 'ATR', 'Sharpe Ratio', 'Beta'
+    'VWAP', 'SMA', 'Std Dev', 'Upper Band', 'Lower Band', 'ATR', 'Sharpe Ratio'
   ];
 
   const firstRowAttributes = attributeLabels.slice(0, Math.ceil(attributeLabels.length / 2));
