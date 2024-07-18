@@ -10,13 +10,13 @@ from sklearn.model_selection import TimeSeriesSplit
 import os
 
 # 股票列表
-# tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA',]  # 科技
-# tickers += ['JPM', 'BAC', 'C', 'WFC', 'GS',]            # 金融
-# tickers += ['JNJ', 'PFE', 'MRK', 'ABBV', 'BMY',]         # 医药
-# tickers += ['XOM', 'CVX', 'COP', 'SLB', 'BKR',]          # 能源
-# tickers += ['DIS', 'NFLX', 'CMCSA', 'NKE', 'SBUX',]      # 消费
-# tickers += ['CAT', 'DE', 'MMM', 'GE', 'HON']            # 工业
-tickers = ['AAPL', 'DIS', 'NFLX']
+tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA',]  # 科技
+tickers += ['JPM', 'BAC', 'C', 'WFC', 'GS',]            # 金融
+tickers += ['JNJ', 'PFE', 'MRK', 'ABBV', 'BMY',]         # 医药
+tickers += ['XOM', 'CVX', 'COP', 'SLB', 'BKR',]          # 能源
+tickers += ['DIS', 'NFLX', 'CMCSA', 'NKE', 'SBUX',]      # 消费
+tickers += ['CAT', 'DE', 'MMM', 'GE', 'HON']            # 工业
+
 
 num_features_to_keep = 9
 start_date = '2020-01-01'
