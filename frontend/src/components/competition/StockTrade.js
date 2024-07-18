@@ -41,8 +41,8 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
 
   return (
     <div className="decision-area">
-      <div>Initial Investment: {balance}</div>
-      <div>Balance: {remainingBalance}</div>
+      <div>Balance: {remainingBalance} &emsp; Initial Investment: {balance}</div>
+      
 
       <div className="stock-container">
         {selectedStock.map((stock) => (

@@ -482,19 +482,15 @@ const CompetitionLayout = () => {
       <div className="app">
         <div className="wrapper d-flex flex-column min-vh-100" style={{ color: 'white' }}>
           <AppHeader />
-          <div className="body flex-grow-1 px-3 d-flex flex-column">
-            <div>Mode: {difficulty}</div>
-            <div className="d-flex justify-content-between align-items-center w-100 mb-3">
-              <div>Current Date: {currentDate.toISOString().split('T')[0]}</div>
-              <div>Cash: ${cash.toFixed(2)}</div>
-              <div>Portfolio Value: ${portfolioValue.toFixed(2)}</div>
-              <div>Total Assets: ${totalAssets.toFixed(2)}</div>
-              <div>AI Cash: ${aiCash.toFixed(2)}</div>
-              <div>AI Portfolio Value: ${aiPortfolioValue.toFixed(2)}</div>
-              <div>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
+          <div className="d-flex justify-content-between align-items-center w-100">
+            <div className="d-flex justify-content-start">
+                Mode: {difficulty}
             </div>
-
-          <div>Mode: {difficulty} &emsp; Current Round: {currentRound}/{MaxRound} &emsp; Current Date: {currentDate.toISOString().split('T')[0]} &emsp; Countdown: {counter}</div>
+            <div className="d-flex justify-content-center align-items-center flex-grow-1">
+                <span className="mx-3">Current Round: {currentRound}/{MaxRound}</span>
+                <span className="mx-3">Current Date: {currentDate.toISOString().split('T')[0]}</span>
+                <span className="mx-3">Countdown: {counter}</span>
+            </div>
             <CDropdown variant="dropdown">
                 <CDropdownToggle caret={true}>
                 <span style={{ color: 'white' }}>Game Credits: 50</span>
@@ -542,37 +538,59 @@ const CompetitionLayout = () => {
                   rowsPerPage={5} />
               </div>
             </div>
-            <div className="bottom-section d-flex justify-content-between">
-              <StockTradeComponent selectedTrades={selectedTrades} setSelectedTrades={setSelectedTrades}
+            <div className="bottom-section d-flex">
+            <div className="left-section" style={{ flex: 1, marginRight: '20px' }}>
+                <StockTradeComponent 
+                selectedTrades={selectedTrades} 
+                setSelectedTrades={setSelectedTrades}
                 initialBalance={initialBalance}
                 userId={userId}
                 selectedStock={selectedStockList}
-                handleSubmit={handleSubmit} />
-              <div className="ranking">
-                <h3>Standings:</h3>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Rank</th>
-                      <th>Competitor</th>
-                      <th>Income</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td>AI</td>
-                      <td>+2000</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>YOU</td>
-                      <td>-2000</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                handleSubmit={handleSubmit} 
+                />
             </div>
+            <div className="right-section" style={{ flex: 1 }}>
+                <div className="financials mb-3">
+                <div className="d-flex justify-content-between align-items-center w-100 mb-3">
+                    <div style={{ marginTop:'21px', marginRight:'4px'}}>Cash: ${cash.toFixed(2)}</div>
+                    <div style={{ marginTop:'21px', marginRight:'4px'}}>Portfolio Value: ${portfolioValue.toFixed(2)}</div>
+                    <div style={{ marginTop:'21px', marginRight:'4px'}}>Total Assets: ${totalAssets.toFixed(2)}</div>
+                </div>
+                <div className="d-flex justify-content-between align-items-center w-100 mb-3">
+                    <div style={{ marginRight:'4px'}}>AI Cash: ${aiCash.toFixed(2)}</div>
+                    <div style={{ marginRight:'4px'}}>AI Portfolio Value: ${aiPortfolioValue.toFixed(2)}</div>
+                    <div style={{ marginRight:'4px'}}>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
+                </div>
+                </div>
+                <div className="ranking">
+                <h3>Standings:</h3>
+                <table className="table">
+                    <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Competitor</th>
+                        <th>Income</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>AI</td>
+                        <td>+2000</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>YOU</td>
+                        <td>-2000</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            </div>
+
+
+
             <div className="history-section">
               <TradeHistory userId={userId} refreshHistory={refreshHistory} selectedStock={selectedStockList} gameId={gameId} />
             </div>
@@ -655,7 +673,8 @@ const CompetitionLayout = () => {
             transform: 'translate(-50%, -50%)',
             width: '80%',
             height: 'auto',
-            zIndex: '1000'
+            zIndex: '1000',
+            color: 'black',
           }
         }}
       >
