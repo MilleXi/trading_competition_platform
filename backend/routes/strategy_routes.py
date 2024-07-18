@@ -177,6 +177,7 @@ class ShortStrategy(MyStrategy):
         (self.data.index <= current_date) & (self.data.index > current_date - timedelta(days=365))]
       benchmark_returns = benchmark_hist.pct_change().dropna()
       betas[symbol] = self.calculate_beta(returns, benchmark_returns)
+    print("sharpes:", sharpes)
 
     weights = {}
     selected_symbols = []
@@ -231,8 +232,26 @@ class ShortStrategy(MyStrategy):
     weight_sum = sum(weights.values())
     weights = {key: value / weight_sum for key, value in weights.items()}
 
+    # for symbol in self.symbols:
+    #   if symbol in weights.keys():
+    #     weights[symbol] += sharpes[symbol]*3
+    #     if weights[symbol] < 0:
+    #       weights[symbol] = 0
+    #
+    # weight_sum = sum(weights.values())
+    # weights = {key: value / weight_sum for key, value in weights.items()}
+
+
     # buy the selected stocks using all the cash
     position = self.adjust_position(current_date)
+    # for symbol, sharpe in sharpes.items():
+    #   print("Sharpe11111:", sharpe)
+    #   position += (sharpe*5)
+    # position *= 0.5
+    # if position > 1:
+    #   position = 1
+    # print("Position11111:", position)
+
     num_stocks = len(selected_symbols)
     use_cash = 0
     for symbol in selected_symbols:

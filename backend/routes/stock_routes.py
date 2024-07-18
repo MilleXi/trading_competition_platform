@@ -51,8 +51,8 @@ def calculate_indicators(df):
   df['Sharpe_Ratio'] = df['Close'].pct_change().rolling(window=252).mean() / df['Close'].pct_change().rolling(
     window=252).std()
 
-  df['Beta'] = df['Close'].pct_change().rolling(window=252).cov(df['Close'].pct_change().rolling(window=252).mean()) / \
-               df['Close'].pct_change().rolling(window=252).var()
+  # df['Beta'] = df['Close'].pct_change().rolling(window=252).cov(df['Close'].pct_change().rolling(window=252).mean()) / \
+  #              df['Close'].pct_change().rolling(window=252).var()
 
   df['MACD'] = df['Close'].ewm(span=12, adjust=False).mean() - df['Close'].ewm(span=26, adjust=False).mean()
 
@@ -87,7 +87,7 @@ def download_stock_data():
           lower_band=row['Lower_band'],
           atr=row['ATR'],
           sharpe_ratio=row['Sharpe_Ratio'],
-          beta=row['Beta']
+          # beta=row['Beta']
         )
         db.session.add(stock_data)
     db.session.commit()
@@ -138,7 +138,7 @@ def get_stored_stock_data():
         'lower_band': round(stock.lower_band, 2),
         'atr': round(stock.atr, 2),
         'sharpe_ratio': round(stock.sharpe_ratio, 2),
-        'beta': round(stock.beta, 2)
+        # 'beta': round(stock.beta, 2)
     } for stock in stocks]
 
     # print("Returned data:", stock_data)
