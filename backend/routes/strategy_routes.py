@@ -281,12 +281,18 @@ def run_strategy():
   data = request.json
   tickers = data['tickers']
   game_id = data['game_id']
+
+  start_test_date = data['start_test_date']
+  start_test_date_str = data['start_test_date']
+  start_test_date = datetime.strptime(start_test_date_str, '%Y-%m-%dT%H:%M:%S.%fZ')
   # print("data:", data)
   # print("tikers:", tickers)
   # print("game_id:", game_id)
-
-  start_test_date = datetime(2023, 1, 1)
+  # start_test_date = data['start_test_date']
+  print("start_test_date111111111111:", start_test_date)
+  # start_test_date = datetime(2023, 1, 1)
   end_test_date = datetime(2024, 1, 1)
+  print("end_test_date111111111111:", end_test_date)
 
   directory_path = 'predictions/LSTM'
   all_predictions = {}

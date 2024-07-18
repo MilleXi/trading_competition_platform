@@ -55,7 +55,7 @@ const TradeHistory = ({ userId, refreshHistory, selectedStock, gameId }) => {
                 const type = trade.transaction_type.charAt(0).toUpperCase() + trade.transaction_type.slice(1);
                 return `${type}: ${trade.amount}`;
               }).join(', ')
-              : 'Hold';
+              : 'Hold: 0';
 
             return <td key={idx}>{tradeInfo}</td>;
           })}
