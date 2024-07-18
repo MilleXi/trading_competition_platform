@@ -22,6 +22,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import GameEndModal from '../components/competition/GameEndModal';
 
 
 const CompetitionLayout = () => {
@@ -45,7 +46,7 @@ const CompetitionLayout = () => {
   const [aiPortfolioValue, setAiPortfolioValue] = useState(0);
   const [aiTotalAssets, setAiTotalAssets] = useState(initialBalance);
   const TMinus = 60;
-  const MaxRound = 10;
+  const MaxRound = 2;
   const [counter, setCounter] = useState(TMinus);
   const [gameEnd, setGameEnd] = useState(false);
   const [refreshHistory, setRefreshHistory] = useState(false);
@@ -62,6 +63,7 @@ const CompetitionLayout = () => {
   const [showPointsStore, setShowPointsStore] = useState(false);
   const [stockInfo, setStockInfo] = useState({});
   const [userInfo, setUserInfo] = useState({});
+  const [showGameEndModal, setShowGameEndModal] = useState(false);
 
   const handleClosePointsStore = () => setShowPointsStore(false);
   const handleShowPointsStore = () => setShowPointsStore(true);
@@ -262,7 +264,7 @@ const CompetitionLayout = () => {
       const aiResponse = await axios.get('http://localhost:8000/api/get_trade_log', {
         params: {
           game_id: gameId,
-          model: 'LSTM',
+          model: modelList[0],
           date: date,
         }
       });
@@ -484,6 +486,10 @@ const CompetitionLayout = () => {
     await runAIStrategy();
 
     setStopCounter(true);
+
+    if (currentRound === MaxRound) {
+      setShowGameEndModal(true); // 显示游戏结束的模态框
+    }
   };
 
   const fetchUserInfo = async () => {
@@ -532,6 +538,7 @@ const CompetitionLayout = () => {
       if (currentRound === MaxRound) {
         setGameEnd(true);
         setStopCounter(true);
+        setShowGameEndModal(true); // 显示游戏结束的模态框
         return;
       }
 
@@ -784,6 +791,15 @@ const CompetitionLayout = () => {
         </div>
         <button onClick={closeStrategyModal} style={{ display: 'block', margin: '20px auto' }}>Close</button>
       </Modal>
+      {/* Game End Modal */}
+      <GameEndModal
+        isOpen={showGameEndModal}
+        onRequestClose={() => setShowGameEndModal(false)}
+        userAssets={totalAssets}
+        aiAssets={aiTotalAssets}
+        userProfit={totalAssets - initialBalance}
+        aiProfit={aiTotalAssets - initialBalance}
+      />
     </div >
   );
 }
