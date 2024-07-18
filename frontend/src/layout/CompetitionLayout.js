@@ -300,7 +300,7 @@ const CompetitionLayout = () => {
             game_id: gameId,
             user_id: 'ai',
             stock_symbol: stock,
-            transaction_type: amount > 0 ? 'buy' : (amount===0?'hold':'sell'),
+            transaction_type: amount > 0 ? 'buy' : (amount === 0 ? 'hold' : 'sell'),
             amount: Math.abs(amount),
             price: stockInfo.open,
             date: currentDate.toISOString()
@@ -564,7 +564,7 @@ const CompetitionLayout = () => {
           <AppHeader />
           <div className="d-flex justify-content-between align-items-center w-100">
             <div className="d-flex justify-content-start">
-                AI Opponent: {difficulty}
+              AI Opponent: {difficulty}
             </div>
             <div className="d-flex justify-content-center align-items-center flex-grow-1">
               <span className="mx-3">Current Round: {currentRound}/{MaxRound}</span>
@@ -682,6 +682,8 @@ const CompetitionLayout = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks"
+        shouldCloseOnEsc={false}
+        shouldCloseOnOverlayClick={false}
         style={{
           content: {
             top: '50%',
