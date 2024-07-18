@@ -41,13 +41,14 @@ class MyStrategy:
     self.last_rebalance = self.start_date
     self.portfolio = {}
     self.prev_price = {}
-    self.data = self.download_data()
+    self.data, self.data_open = self.download_data()
     self.strategy = "Naive"
 
   def download_data(self):
     symbols = self.symbols + ['SPY']  # download the benchmark data
     data = yf.download(symbols, start=self.start_date, end=self.end_date + timedelta(days=30))['Close']
-    return data
+    data_open = yf.download(symbols, start=self.start_date, end=self.end_date + timedelta(days=30))['Open']
+    return data, data_open
 
   def calculate_sharpe_ratio(self, returns):
     excess_returns = returns - self.risk_free_rate / 252
@@ -155,7 +156,7 @@ class ShortStrategy(MyStrategy):
     for symbol, shares in self.portfolio.items():
       print("price:", self.data[symbol][current_date], "share:", shares)
 
-    portfolio_value = sum(self.data[symbol][current_date] * shares for symbol, shares in self.portfolio.items())
+    portfolio_value = sum(self.data_open[symbol][current_date] * shares for symbol, shares in self.portfolio.items())
     self.cash += portfolio_value
 
     # Clear current portfolio
@@ -217,8 +218,8 @@ class ShortStrategy(MyStrategy):
     for symbol in selected_symbols:
       symbol_weight = weights[symbol]
       self.portfolio[symbol] = math.floor(
-        (self.cash * position * symbol_weight) / self.data[symbol][current_date])
-      use_cash += self.data[symbol][current_date] * self.portfolio[symbol]
+        (self.cash * position * symbol_weight) / self.data_open[symbol][current_date])
+      use_cash += self.data_open[symbol][current_date] * self.portfolio[symbol]
     self.cash -= use_cash
 
     position_change = {}
