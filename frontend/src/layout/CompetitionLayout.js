@@ -29,7 +29,7 @@ const CompetitionLayout = () => {
   const startDate = new Date('2023-01-03');
   const gameIdRef = useRef(uuidv4());
   const gameId = gameIdRef.current;
-  const modelList = ['LSTM'];
+  const [modelList, setModelList] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [currentDate, setCurrentDate] = useState(startDate);
   const [selectedStock, setSelectedStock] = useState('AAPL');
@@ -54,7 +54,7 @@ const CompetitionLayout = () => {
   const userId = 1;
   const [CandlestickChartData, setCandlestickChartData] = useState([]);
   const location = useLocation();
-  const { difficulty } = location.state || { difficulty: 'Easy' };
+  const { difficulty } = location.state || { difficulty: 'LSTM' };
   const rootElement = document.getElementById('root');
   const [aiStrategy, setAiStrategy] = useState({});
   const [showStrategyModal, setShowStrategyModal] = useState(false);
@@ -67,6 +67,10 @@ const CompetitionLayout = () => {
   const handleShowPointsStore = () => setShowPointsStore(true);
 
   Modal.setAppElement(rootElement);
+
+  useEffect(() => {
+    setModelList([difficulty]);
+  }, [difficulty]);
 
   useEffect(() => {
     const fetchStockData = async () => {
@@ -206,7 +210,7 @@ const CompetitionLayout = () => {
       for (const record of response.data.trade_log) {
         const logEntry = {
           ...record,
-          model: "LSTM",
+          model: modelList[0],
           game_id: gameId
         };
         await axios.post('http://localhost:8000/api/save_trade_log', logEntry);
@@ -524,7 +528,7 @@ const CompetitionLayout = () => {
           <AppHeader />
           <div className="d-flex justify-content-between align-items-center w-100">
             <div className="d-flex justify-content-start">
-              Mode: {difficulty}
+                AI Opponent: {difficulty}
             </div>
             <div className="d-flex justify-content-center align-items-center flex-grow-1">
               <span className="mx-3">Current Round: {currentRound}/{MaxRound}</span>

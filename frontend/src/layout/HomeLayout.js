@@ -21,7 +21,7 @@ import {
 
 const HomeLayout = () => {
   const [difficultyModalVisible, setDifficultyModalVisible] = useState(false);
-  const [difficulty, setDifficulty] = useState('Easy');
+  const [difficulty, setDifficulty] = useState('LSTM');
   const navigate = useNavigate();
 
   const startGame = () => {
