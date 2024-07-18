@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import axios from 'axios';
-
 
 const FinancialReport = ({
   selectedStock,
@@ -24,25 +22,6 @@ const FinancialReport = ({
 }) => {
   const [selectedAttribute, setSelectedAttribute] = useState(null);
   const [showChart, setShowChart] = useState(false);
-
-  useEffect(() => {
-    const fetchStockData = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
-          params: {
-            symbol: selectedStock,
-            start_date: '2021-01-01',
-            end_date: currentDate.toISOString().split('T')[0]
-          }
-        });
-        setStockData(response.data.reverse());
-      } catch (error) {
-        console.error('Error fetching stock data:', error);
-      }
-    };
-
-    fetchStockData();
-  }, [selectedStock]);
 
   const handleAttributeClick = (attribute) => {
     if (attribute === 'Date') return;
@@ -72,8 +51,15 @@ const FinancialReport = ({
     };
   }, [showChart]);
 
+  const getFilteredStockData = () => {
+    const filteredData = stockData
+      .filter(data => new Date(data.date) < currentDate)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    return filteredData;
+  };
+
   const getChartData = () => {
-    return stockData.map(data => ({
+    return getFilteredStockData().map(data => ({
       date: new Date(data.date).toLocaleDateString('en-CA'),
       [selectedAttribute]: data[selectedAttribute?.replace(' ', '_').toLowerCase()]
     }));
@@ -107,7 +93,7 @@ const FinancialReport = ({
                 </tr>
               </thead>
               <tbody>
-                {stockData.slice(0, rowsPerPage).map(data => (
+                {getFilteredStockData().slice(0, rowsPerPage).map(data => (
                   <tr key={`${data.date}-first-row`}>
                     {firstRowAttributes.map(attribute => (
                       <td key={attribute}>{attribute === 'Date' ? formatDate(data.date) : data[attribute.toLowerCase().replace(' ', '_')]}</td>
@@ -129,7 +115,7 @@ const FinancialReport = ({
                 </tr>
               </thead>
               <tbody>
-                {stockData.slice(0, rowsPerPage).map(data => (
+                {getFilteredStockData().slice(0, rowsPerPage).map(data => (
                   <tr key={`${data.date}-second-row`}>
                     {secondRowAttributes.map(attribute => (
                       <td key={attribute}>{attribute === 'Date' ? formatDate(data.date) : data[attribute.toLowerCase().replace(' ', '_')]}</td>
