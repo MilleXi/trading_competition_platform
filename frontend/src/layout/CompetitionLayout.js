@@ -28,7 +28,7 @@ const CompetitionLayout = () => {
   const startDate = new Date('2023-01-03');
   const gameIdRef = useRef(uuidv4());
   const gameId = gameIdRef.current;
-  const modelList = ['LSTM'];
+  const [modelList, setModelList] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [currentDate, setCurrentDate] = useState(startDate);
   const [selectedStock, setSelectedStock] = useState('AAPL');
@@ -53,7 +53,7 @@ const CompetitionLayout = () => {
   const userId = 1;
   const [CandlestickChartData, setCandlestickChartData] = useState([]);
   const location = useLocation();
-  const { difficulty } = location.state || { difficulty: 'Easy' };
+  const { difficulty } = location.state || { difficulty: 'LSTM' };
   const rootElement = document.getElementById('root');
   const [aiStrategy, setAiStrategy] = useState({});
   const [showStrategyModal, setShowStrategyModal] = useState(false);
@@ -66,6 +66,10 @@ const CompetitionLayout = () => {
   const handleShowPointsStore = () => setShowPointsStore(true);
 
   Modal.setAppElement(rootElement);
+
+  useEffect(() => {
+    setModelList([difficulty]);
+  }, [difficulty]);
 
   useEffect(() => {
     const fetchStockData = async () => {
@@ -205,7 +209,7 @@ const CompetitionLayout = () => {
       for (const record of response.data.trade_log) {
         const logEntry = {
           ...record,
-          model: "LSTM",
+          model: modelList[0],
           game_id: gameId
         };
         await axios.post('http://localhost:8000/api/save_trade_log', logEntry);
@@ -329,15 +333,15 @@ const CompetitionLayout = () => {
     const date = currentDate.toISOString().split('T')[0]; // 确保date是一个字符串
     let userInfo2 = await fetchUserInfo();
     console.log("fetchStockInfo userInfo2:", userInfo2);
-  
+
     if (!userInfo2) {
       userInfo2 = userInfo
       console.log("fetchUserinfo failed");
       return;
     }
-  
+
     const newStockInfo = {};
-  
+
     for (const stock of Object.keys(selectedTrades)) {
       console.log("useEffect stock:", stock);
       try {
@@ -348,7 +352,7 @@ const CompetitionLayout = () => {
             end_date: date
           }
         });
-  
+
         if (response.data && response.data[0]) {
           newStockInfo[stock] = response.data[0];
         } else {
@@ -358,14 +362,14 @@ const CompetitionLayout = () => {
         console.error(`Error fetching stock data for ${stock}:`, error);
       }
     }
-  
+
     setStockInfo(newStockInfo);
     console.log("fetchStockInfo stockInfo:", newStockInfo);
-  
+
     if (!userInfo2.stocks) {
       userInfo2.stocks = selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: 0 }), {});
     }
-  
+
     const portfolioValue = await selectedStockList.reduce(async (accPromise, stock) => {
       const acc = await accPromise;
       console.log("stock", stock);
@@ -378,35 +382,35 @@ const CompetitionLayout = () => {
         }
       });
       const filteredData = response.data;
-  
+
       if (filteredData.length === 0) {
         console.error(`Stock info for ${stock} on ${date} not found`);
         return acc;
       }
-  
+
       const stockInfo = filteredData[0];
       console.log("stockInfo:", stockInfo);
       return acc + (userInfo2.stocks[stock] || 0) * stockInfo.close;
     }, Promise.resolve(0));
-  
+
     userInfo2.portfolio_value = portfolioValue;
     userInfo2.total_assets = userInfo2.cash + userInfo2.portfolio_value;
-  
+
     // 更新前端显示的余额值
     setCash(userInfo2.cash);
     setPortfolioValue(userInfo2.portfolio_value);
     setTotalAssets(userInfo2.total_assets);
     setUserInfo(userInfo2);
     console.log('userinfo:', userInfo2);
-  
+
     console.log("fetchStockInfo userInfo:", userInfo2);
   };
-  
+
   useEffect(() => {
     console.log("useEffect currentDate:", currentDate);
     fetchStockInfo();
   }, [currentDate, selectedTrades]);
-  
+
 
 
   const handleSubmit = async () => {
@@ -435,7 +439,7 @@ const CompetitionLayout = () => {
     }
 
     console.log('submit userInfo2:', userInfo2);
-    
+
     // 先保存用户的game_info
     try {
       await axios.post('http://localhost:8000/api/game_info', userInfo2);
@@ -523,7 +527,7 @@ const CompetitionLayout = () => {
           <AppHeader />
           <div className="d-flex justify-content-between align-items-center w-100">
             <div className="d-flex justify-content-start">
-                Mode: {difficulty}
+                AI Opponent: {difficulty}
             </div>
             <div className="d-flex justify-content-center align-items-center flex-grow-1">
                 <span className="mx-3">Current Round: {currentRound}/{MaxRound}</span>
@@ -579,14 +583,14 @@ const CompetitionLayout = () => {
             </div>
             <div className="bottom-section d-flex">
             <div className="left-section" style={{ flex: 1, marginRight: '20px' }}>
-                <StockTradeComponent 
-                selectedTrades={selectedTrades} 
+                <StockTradeComponent
+                selectedTrades={selectedTrades}
                 setSelectedTrades={setSelectedTrades}
                 initialBalance={initialBalance}
                 cash={cash}
                 userId={userId}
                 selectedStock={selectedStockList}
-                handleSubmit={handleSubmit} 
+                handleSubmit={handleSubmit}
                 stockData={stockInfo}
                 userInfo={userInfo}
                 />
