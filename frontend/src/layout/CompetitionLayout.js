@@ -22,16 +22,18 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-
+import GameEndModal from '../components/competition/GameEndModal';
+import Standings from '../components/competition/Standings';
+import { Button } from '@mui/material';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
-  const startDate = new Date('2023-01-03');
+  const [startDate, setStartDate] = useState(null); // 初始状态为 null
   const gameIdRef = useRef(uuidv4());
   const gameId = gameIdRef.current;
   const [modelList, setModelList] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
-  const [currentDate, setCurrentDate] = useState(startDate);
+  const [currentDate, setCurrentDate] = useState(null); // 初始状态为 null
   const [selectedStock, setSelectedStock] = useState('AAPL');
   const [selectedStockList, setSelectedStockList] = useState(['AAPL', 'MSFT', 'GOOGL']);
   const [stockData, setStockData] = useState([]);
@@ -45,7 +47,7 @@ const CompetitionLayout = () => {
   const [aiPortfolioValue, setAiPortfolioValue] = useState(0);
   const [aiTotalAssets, setAiTotalAssets] = useState(initialBalance);
   const TMinus = 60;
-  const MaxRound = 10;
+  const MaxRound = 20;
   const [counter, setCounter] = useState(TMinus);
   const [gameEnd, setGameEnd] = useState(false);
   const [refreshHistory, setRefreshHistory] = useState(false);
@@ -62,11 +64,32 @@ const CompetitionLayout = () => {
   const [showPointsStore, setShowPointsStore] = useState(false);
   const [stockInfo, setStockInfo] = useState({});
   const [userInfo, setUserInfo] = useState({});
+  const [showGameEndModal, setShowGameEndModal] = useState(false);
 
   const handleClosePointsStore = () => setShowPointsStore(false);
   const handleShowPointsStore = () => setShowPointsStore(true);
 
   Modal.setAppElement(rootElement);
+
+  useEffect(() => {
+    const randomDate = new Date(2023, 0, 1 + Math.floor(Math.random() * 300)); // 随机生成 2023-01-01 到 2023-12-01 之间的日期
+    console.log("Date::", randomDate)
+    const fetchTradingDay = async () => {
+      try {
+        const response = await axios.post('http://localhost:8000/api/next_trading_day', {
+          current_date: randomDate.toISOString().split('T')[0],
+          n: 1 // 获取当前日期的交易日
+        });
+        const tradingDay = new Date(response.data.next_trading_day);
+        setStartDate(tradingDay);
+        setCurrentDate(tradingDay);
+      } catch (error) {
+        console.error('Error fetching next trading day:', error);
+      }
+    };
+
+    fetchTradingDay();
+  }, []); // 仅在组件首次加载时调用一次
 
   useEffect(() => {
     setModelList([difficulty]);
@@ -95,14 +118,17 @@ const CompetitionLayout = () => {
       }
     };
 
-    fetchStockData();
-  }, [selectedStock]);
+    if (selectedStock && currentDate) { // 确保在 currentDate 已设置之后再调用
+      fetchStockData();
+    }
+  }, [selectedStock, currentDate]);
 
   useEffect(() => {
     console.log("StockData changed:", stockData);
   }, [stockData]);
 
   useEffect(() => {
+    if (!startDate) return; // 确保 startDate 已设置之后再初始化游戏信息
     const initializeGameInfo = async () => {
       try {
         const initialData = {
@@ -149,7 +175,7 @@ const CompetitionLayout = () => {
     initializeGameInfo();
     fetchStockInfo();
     console.log('initialize');
-  }, []);
+  }, [startDate]);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -203,6 +229,7 @@ const CompetitionLayout = () => {
       const response = await axios.post('http://localhost:8000/api/run_strategy', {
         tickers: selectedTickers,
         game_id: gameId,
+        start_test_date: currentDate
       });
       console.log('Strategy result:', response.data);
 
@@ -238,7 +265,7 @@ const CompetitionLayout = () => {
       const aiResponse = await axios.get('http://localhost:8000/api/get_trade_log', {
         params: {
           game_id: gameId,
-          model: 'LSTM',
+          model: modelList[0],
           date: date,
         }
       });
@@ -248,6 +275,12 @@ const CompetitionLayout = () => {
 
         // 直接使用从后端获取的ai策略数据
         const strategy = aiResponse.data.change || {};
+        if (Object.keys(strategy).length === 0) {
+          selectedStockList.forEach(stock => {
+            strategy[stock] = 0;
+          });
+        }
+
         for (const [stock, amount] of Object.entries(strategy)) {
           const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
             params: {
@@ -270,7 +303,7 @@ const CompetitionLayout = () => {
             game_id: gameId,
             user_id: 'ai',
             stock_symbol: stock,
-            transaction_type: amount > 0 ? 'buy' : 'sell',
+            transaction_type: amount > 0 ? 'buy' : (amount === 0 ? 'hold' : 'sell'),
             amount: Math.abs(amount),
             price: stockInfo.open,
             date: currentDate.toISOString()
@@ -408,8 +441,10 @@ const CompetitionLayout = () => {
   };
 
   useEffect(() => {
-    console.log("useEffect currentDate:", currentDate);
-    fetchStockInfo();
+    if (currentDate) {
+      console.log("useEffect currentDate:", currentDate);
+      fetchStockInfo();
+    }
   }, [currentDate, selectedTrades]);
 
 
@@ -435,7 +470,7 @@ const CompetitionLayout = () => {
         userInfo2.stocks[stock] = (userInfo2.stocks[stock] || 0) + parseFloat(amount);
       } else if (type === 'sell') {
         userInfo2.cash += stockInfo[stock].open * amount;
-        userInfo2.stocks[stock] = (userInfo2.stocks[stock] || 0) - parseFloat(amount);
+        userInfo2.stocks[stock] = (userInfo2.stocks[stock] || 0) - Math.abs(amount);
       }
     }
 
@@ -452,6 +487,7 @@ const CompetitionLayout = () => {
     await runAIStrategy();
 
     setStopCounter(true);
+
   };
 
   const fetchUserInfo = async () => {
@@ -500,6 +536,7 @@ const CompetitionLayout = () => {
       if (currentRound === MaxRound) {
         setGameEnd(true);
         setStopCounter(true);
+        setShowGameEndModal(true); // 显示游戏结束的模态框
         return;
       }
 
@@ -521,14 +558,18 @@ const CompetitionLayout = () => {
     setStopCounter(false);
   };
 
+  if (!currentDate) {
+    return <div>Loading...</div>; // 在 currentDate 未设置之前显示加载状态
+  }
+
   return (
     <div className="background">
       <div className="app">
         <div className="wrapper d-flex flex-column min-vh-100" style={{ color: 'white' }}>
           <AppHeader />
           <div className="d-flex justify-content-between align-items-center w-100">
-            <div className="d-flex justify-content-start">
-                AI Opponent: {difficulty}
+            <div className="d-flex justify-content-start" style={{ padding: '1em' }}>
+              AI Opponent: {difficulty}
             </div>
             <div className="d-flex justify-content-center align-items-center flex-grow-1">
               <span className="mx-3">Current Round: {currentRound}/{MaxRound}</span>
@@ -609,7 +650,7 @@ const CompetitionLayout = () => {
                     <div style={{ marginRight: '4px' }}>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
                   </div>
                 </div>
-                <div className="ranking">
+                {/* <div className="ranking">
                   <h3>Standings:</h3>
                   <table className="table">
                     <thead>
@@ -632,7 +673,8 @@ const CompetitionLayout = () => {
                       </tr>
                     </tbody>
                   </table>
-                </div>
+                </div> */}
+                <Standings initialBalance={initialBalance} totalAssets={totalAssets} aiTotalAssets={aiTotalAssets} />
               </div>
             </div>
 
@@ -646,6 +688,8 @@ const CompetitionLayout = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks"
+        shouldCloseOnEsc={false}
+        shouldCloseOnOverlayClick={false}
         style={{
           content: {
             top: '50%',
@@ -687,7 +731,7 @@ const CompetitionLayout = () => {
           ))}
         </Grid>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-          <button
+          <Button
             onClick={confirmSelection}
             style={{
               padding: '10px 20px',
@@ -701,7 +745,7 @@ const CompetitionLayout = () => {
             }}
           >
             Confirm
-          </button>
+          </Button>
         </div>
       </Modal>
 
@@ -746,8 +790,17 @@ const CompetitionLayout = () => {
             <p>No AI strategy found</p>
           )}
         </div>
-        <button onClick={closeStrategyModal} style={{ display: 'block', margin: '20px auto' }}>Close</button>
+        <Button onClick={closeStrategyModal} style={{ display: 'block', margin: '20px auto' }} variant='outlined'>Close</Button>
       </Modal>
+      {/* Game End Modal */}
+      <GameEndModal
+        isOpen={showGameEndModal}
+        onRequestClose={() => setShowGameEndModal(false)}
+        userAssets={totalAssets}
+        aiAssets={aiTotalAssets}
+        userProfit={totalAssets - initialBalance}
+        aiProfit={aiTotalAssets - initialBalance}
+      />
     </div >
   );
 }

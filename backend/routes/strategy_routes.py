@@ -172,6 +172,13 @@ class ShortStrategy(MyStrategy):
       returns = hist.pct_change().dropna()
       sharpes[symbol] = self.calculate_sharpe_ratio(returns)
 
+      # 计算beta值
+      benchmark_hist = self.data['SPY'][
+        (self.data.index <= current_date) & (self.data.index > current_date - timedelta(days=365))]
+      benchmark_returns = benchmark_hist.pct_change().dropna()
+      betas[symbol] = self.calculate_beta(returns, benchmark_returns)
+    print("sharpes:", sharpes)
+
     weights = {}
     selected_symbols = []
     current_date_index = self.data.index.get_loc(current_date)
@@ -200,6 +207,16 @@ class ShortStrategy(MyStrategy):
           if symbol in selected_symbols:
             selected_symbols.remove(symbol)  # Skip buying this stock
 
+    plus_symbols = []
+    if self.is_bull_market(current_date):
+      plus_symbols = [symbol for symbol in self.symbols if betas.get(symbol, 0) > 1]
+    else:
+      plus_symbols = [symbol for symbol in self.symbols if betas.get(symbol, 0) < 0.2]
+    for symbol in plus_symbols:
+      if symbol not in selected_symbols:
+        selected_symbols.append(symbol)
+
+
     # set the weights for selected symbols
     weights = {}
     for symbol, model_predict in self.model_predict.items():
@@ -208,11 +225,33 @@ class ShortStrategy(MyStrategy):
         continue
       weights[symbol] = model_predict_tomorrow
 
+    for symbol in plus_symbols:
+      weights[symbol] = 0.3
+
+
     weight_sum = sum(weights.values())
     weights = {key: value / weight_sum for key, value in weights.items()}
 
+    # for symbol in self.symbols:
+    #   if symbol in weights.keys():
+    #     weights[symbol] += sharpes[symbol]*3
+    #     if weights[symbol] < 0:
+    #       weights[symbol] = 0
+    #
+    # weight_sum = sum(weights.values())
+    # weights = {key: value / weight_sum for key, value in weights.items()}
+
+
     # buy the selected stocks using all the cash
     position = self.adjust_position(current_date)
+    # for symbol, sharpe in sharpes.items():
+    #   print("Sharpe11111:", sharpe)
+    #   position += (sharpe*5)
+    # position *= 0.5
+    # if position > 1:
+    #   position = 1
+    # print("Position11111:", position)
+
     num_stocks = len(selected_symbols)
     use_cash = 0
     for symbol in selected_symbols:
@@ -281,12 +320,18 @@ def run_strategy():
   data = request.json
   tickers = data['tickers']
   game_id = data['game_id']
+
+  start_test_date = data['start_test_date']
+  start_test_date_str = data['start_test_date']
+  start_test_date = datetime.strptime(start_test_date_str, '%Y-%m-%dT%H:%M:%S.%fZ')
   # print("data:", data)
   # print("tikers:", tickers)
   # print("game_id:", game_id)
-
-  start_test_date = datetime(2023, 1, 1)
+  # start_test_date = data['start_test_date']
+  print("start_test_date111111111111:", start_test_date)
+  # start_test_date = datetime(2023, 1, 1)
   end_test_date = datetime(2024, 1, 1)
+  print("end_test_date111111111111:", end_test_date)
 
   directory_path = 'predictions/LSTM'
   all_predictions = {}

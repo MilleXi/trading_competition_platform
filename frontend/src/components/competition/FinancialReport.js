@@ -23,6 +23,8 @@ const FinancialReport = ({
   const [selectedAttribute, setSelectedAttribute] = useState(null);
   const [showChart, setShowChart] = useState(false);
 
+  console.log('Financial stockData:', stockData);
+
   const handleAttributeClick = (attribute) => {
     if (attribute === 'Date') return;
     if (selectedAttribute === attribute) {
@@ -59,10 +61,11 @@ const FinancialReport = ({
   };
 
   const getChartData = () => {
-    return getFilteredStockData().map(data => ({
-      date: new Date(data.date).toLocaleDateString('en-CA'),
-      [selectedAttribute]: data[selectedAttribute?.replace(' ', '_').toLowerCase()]
-    }));
+    return getFilteredStockData().sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map(data => ({
+        date: new Date(data.date).toLocaleDateString('en-CA'),
+        [selectedAttribute]: data[selectedAttribute?.replace(' ', '_').toLowerCase()]
+      }));
   };
 
   const formatDate = (dateString) => {
@@ -72,7 +75,7 @@ const FinancialReport = ({
 
   const attributeLabels = [
     'Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA10', 'MA20', 'RSI', 'MACD',
-    'VWAP', 'SMA', 'Std Dev', 'Upper Band', 'Lower Band', 'ATR', 'Sharpe Ratio', 'Beta'
+    'VWAP', 'SMA', 'Std Dev', 'Upper Band', 'Lower Band', 'ATR', 'Sharpe Ratio'
   ];
 
   const firstRowAttributes = attributeLabels.slice(0, Math.ceil(attributeLabels.length / 2));
