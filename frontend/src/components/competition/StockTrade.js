@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
+import { Checkbox } from '@mui/material';
 
 const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance, cash, userId, selectedStock, handleSubmit, stockData, userInfo }) => {
   // const [tempCash, setTempCash] = useState(cash);
@@ -44,7 +45,7 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
     value = Math.max(value, 0);
     console.log('onBuyInput stockData:', stockData);
     let _cash = cash;
-    for (let stockOther in stockData) 
+    for (let stockOther in stockData)
       if (stockOther !== stock)
         if (selectedTrades[stockOther].type === 'buy')
           _cash -= stockData[stockOther].open * selectedTrades[stockOther].amount;
@@ -65,16 +66,25 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
     return value;
   }
 
+  const getStockAmount = (stock) => {
+    console.log('getStockAmount userInfo:', userInfo);
+    if (userInfo && userInfo['stocks'] && userInfo['stocks'][stock] !== undefined) {
+      return userInfo['stocks'][stock];
+    } else {
+      return 0; // 默认为0股份
+    }
+  };
+
   return (
     <div className="decision-area">
       <div>Initial Investment: {initialBalance} &emsp; Cash: {cash}</div>
       <div className="stock-container">
         {selectedStock.map((stock) => (
           <div key={stock} className="stock-item" style={{ flex: '1' }}>
-            <div className="stock-name">{stock}</div>
+            <div className="stock-name">{stock} Share: {getStockAmount(stock)}</div>
             <div className="trade-options">
               <div>
-                <input
+                <Checkbox
                   type="radio"
                   name={`${stock}-trade`}
                   value="buy"
@@ -95,7 +105,7 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
                 )}
               </div>
               <div>
-                <input
+                <Checkbox
                   type="radio"
                   name={`${stock}-trade`}
                   value="sell"
@@ -116,7 +126,7 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
                 )}
               </div>
               <div>
-                <input
+                <Checkbox
                   type="radio"
                   name={`${stock}-trade`}
                   value="hold"
@@ -130,11 +140,11 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
         ))}
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-        <Button className="clear-button" onClick={handleClear} variant='outlined' style={{color:'#e3f2fd'}}>Clear</Button>
+        <Button className="clear-button" onClick={handleClear} variant='outlined' style={{ color: '#e3f2fd' }}>Clear</Button>
         <Button
           className={`submit-button ${Object.values(selectedTrades).length > 0 && !gameEnd ? 'active' : 'disabled'}`}
           variant='outlined'
-          style={{color:'#e0f2f1'}}
+          style={{ color: '#e0f2f1' }}
           onClick={handleSubmit}
           disabled={Object.keys(selectedTrades).length === 0}
         >
