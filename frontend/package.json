@@ -30,6 +30,7 @@
     "@coreui/utils": "^2.0.2",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.16.4",
     "@mui/material": "^5.16.4",
     "@popperjs/core": "^2.11.8",
     "apexcharts": "^3.50.0",
@@ -62,6 +63,6 @@
     "postcss": "^8.4.38",
     "prettier": "3.3.2",
     "sass": "^1.77.5",
-    "vite": "^5.3.3"
+    "vite": "^5.3.4"
   }
 }

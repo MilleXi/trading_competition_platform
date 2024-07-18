@@ -10,8 +10,18 @@ import CandlestickChart from '../components/competition/CandlestickChart';
 import StockTradeComponent from '../components/competition/StockTrade';
 import FinancialReport from '../components/competition/FinancialReport';
 import TradeHistory from '../components/competition/TradeHistory';
+import PointsStoreModal from '../components/competition/PointsStoreModal';
 import { v4 as uuidv4 } from 'uuid';
 import App from '../App';
+import zIndex from '@mui/material/styles/zIndex';
+import Box from '@mui/material/Box';
+import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
@@ -48,6 +58,10 @@ const CompetitionLayout = () => {
   const [aiStrategy, setAiStrategy] = useState({});
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [stopCounter, setStopCounter] = useState(false);
+  const [showPointsStore, setShowPointsStore] = useState(false);
+
+  const handleClosePointsStore = () => setShowPointsStore(false);
+  const handleShowPointsStore = () => setShowPointsStore(true);
 
   Modal.setAppElement(rootElement);
 
@@ -479,24 +493,24 @@ const CompetitionLayout = () => {
               <div>AI Portfolio Value: ${aiPortfolioValue.toFixed(2)}</div>
               <div>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
             </div>
-          </div>
-          <div className="top-bar d-flex justify-content-between align-items-center">
-            <div onClick={openModal} style={{ outline: "double white" }}>Select Stocks</div>
-            <div>Current Round: {currentRound}/{MaxRound}  &emsp;  Countdown: {counter}</div>
 
+          <div>Mode: {difficulty} &emsp; Current Round: {currentRound}/{MaxRound} &emsp; Current Date: {currentDate.toISOString().split('T')[0]} &emsp; Countdown: {counter}</div>
             <CDropdown variant="dropdown">
-              <CDropdownToggle caret={true}>
-                <span style={{ color: 'white' }}>Game Credits: 100</span>
-              </CDropdownToggle>
+                <CDropdownToggle caret={true}>
+                <span style={{ color: 'white' }}>Game Credits: 50</span>
+                </CDropdownToggle>
 
-              <CDropdownMenu className='dropdown-menu'>
-                <CDropdownItem className='dropdown-item'>
-                  <span style={{ color: 'white' }}>Shop</span>
+                <CDropdownMenu className='dropdown-menu'>
+                <CDropdownItem className='dropdown-item' onClick={handleShowPointsStore}>
+                    <span style={{ color: 'white' }}>Shop</span>
                 </CDropdownItem>
-                {/* 积分商城内容可以在此处添加 */}
-              </CDropdownMenu>
+                </CDropdownMenu>
             </CDropdown>
+
+            {/* Points Store Modal */}
+            <PointsStoreModal show={showPointsStore} handleClose={handleClosePointsStore} />
           </div>
+
           <div className="body flex-grow-1 px-3 d-flex flex-column align-items-center">
             <div className="d-flex justify-content-center w-100 mb-3" style={{ padding: '1em' }}>
               {selectedStockList.map((stock) => (
@@ -565,10 +579,10 @@ const CompetitionLayout = () => {
           </div>
         </div>
       </div>
-
+    
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks"
         style={{
-          content: {
+            content: {
             top: '50%',
             left: '50%',
             right: 'auto',
@@ -577,29 +591,55 @@ const CompetitionLayout = () => {
             transform: 'translate(-50%, -50%)',
             width: '80%',
             height: 'auto',
-            zIndex: '1000'
-          }
+            zIndex: '1000',
+            border: '1px solid #ccc',
+            borderRadius: '10px',
+            padding: '20px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            }
         }}
-      >
-        <h2>Select 3 Stocks</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {tickers.map((ticker) => (
-            <button
-              key={ticker}
-              onClick={() => handleTickerSelection(ticker)}
-              style={{
-                margin: '5px',
-                padding: '10px',
-                backgroundColor: selectedTickers.includes(ticker) ? 'green' : 'gray'
-              }}
+        >
+        <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '20px'}}>Please Select 3 Stocks</h2>
+        <Grid container spacing={2}>
+            {tickers.map((ticker) => (
+            <Grid item xs={2} key={ticker}>
+                <FormControlLabel
+                control={
+                    <Checkbox
+                    checked={selectedTickers.includes(ticker)}
+                    onChange={() => handleTickerSelection(ticker)}
+                    name={ticker}
+                    color="primary"
+                    />
+                }
+                label={
+                    <Typography sx={{ fontSize: '22px', color: 'black' }}>
+                      {ticker}
+                    </Typography>
+                  }
+                />
+            </Grid>
+            ))}
+        </Grid>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+            <button 
+            onClick={confirmSelection}
+            style={{
+                padding: '10px 20px',
+                backgroundColor: '#008CBA',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                outline: 'none',
+                fontSize: '20px'
+            }}
             >
-              {ticker}
+            Confirm
             </button>
-          ))}
         </div>
-        <button onClick={confirmSelection}>Confirm</button>
-        {/* <button onClick={closeModal} disabled={selectedTickers.length < 3}>Cancel</button> */}
       </Modal>
+
 
       <Modal
         isOpen={showStrategyModal}
