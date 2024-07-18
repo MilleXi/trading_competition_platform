@@ -121,12 +121,13 @@
 }
 
 .stock-name {
-  font-weight: bold;
+  font-size: 18px;
   margin-bottom: 10px;
 }
 
 .trade-options {
   display: flex;
+  font-size: 16px;
   flex-direction: column;
 }
 
@@ -147,7 +148,7 @@
 }
 
 .submit-button.active {
-  background-color: #28a745;
+  background-color: #2f3339;
   color: white;
   cursor: pointer;
 }

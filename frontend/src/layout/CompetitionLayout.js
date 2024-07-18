@@ -23,7 +23,8 @@ import FormLabel from '@mui/material/FormLabel';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import GameEndModal from '../components/competition/GameEndModal';
-
+import Standings from '../components/competition/Standings';
+import { Button } from '@mui/material';
 
 const CompetitionLayout = () => {
   const initialBalance = 100000;
@@ -649,7 +650,7 @@ const CompetitionLayout = () => {
                     <div style={{ marginRight: '4px' }}>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
                   </div>
                 </div>
-                <div className="ranking">
+                {/* <div className="ranking">
                   <h3>Standings:</h3>
                   <table className="table">
                     <thead>
@@ -672,7 +673,8 @@ const CompetitionLayout = () => {
                       </tr>
                     </tbody>
                   </table>
-                </div>
+                </div> */}
+                <Standings initialBalance={initialBalance} totalAssets={totalAssets} aiTotalAssets={aiTotalAssets} />
               </div>
             </div>
 
@@ -729,7 +731,7 @@ const CompetitionLayout = () => {
           ))}
         </Grid>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-          <button
+          <Button
             onClick={confirmSelection}
             style={{
               padding: '10px 20px',
@@ -743,7 +745,7 @@ const CompetitionLayout = () => {
             }}
           >
             Confirm
-          </button>
+          </Button>
         </div>
       </Modal>
 
@@ -788,7 +790,7 @@ const CompetitionLayout = () => {
             <p>No AI strategy found</p>
           )}
         </div>
-        <button onClick={closeStrategyModal} style={{ display: 'block', margin: '20px auto' }}>Close</button>
+        <Button onClick={closeStrategyModal} style={{ display: 'block', margin: '20px auto' }} variant='outlined'>Close</Button>
       </Modal>
       {/* Game End Modal */}
       <GameEndModal
