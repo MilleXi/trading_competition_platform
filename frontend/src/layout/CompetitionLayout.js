@@ -46,7 +46,7 @@ const CompetitionLayout = () => {
   const [aiPortfolioValue, setAiPortfolioValue] = useState(0);
   const [aiTotalAssets, setAiTotalAssets] = useState(initialBalance);
   const TMinus = 60;
-  const MaxRound = 2;
+  const MaxRound = 20;
   const [counter, setCounter] = useState(TMinus);
   const [gameEnd, setGameEnd] = useState(false);
   const [refreshHistory, setRefreshHistory] = useState(false);
@@ -487,9 +487,6 @@ const CompetitionLayout = () => {
 
     setStopCounter(true);
 
-    if (currentRound === MaxRound) {
-      setShowGameEndModal(true); // 显示游戏结束的模态框
-    }
   };
 
   const fetchUserInfo = async () => {
@@ -570,7 +567,7 @@ const CompetitionLayout = () => {
         <div className="wrapper d-flex flex-column min-vh-100" style={{ color: 'white' }}>
           <AppHeader />
           <div className="d-flex justify-content-between align-items-center w-100">
-            <div className="d-flex justify-content-start">
+            <div className="d-flex justify-content-start" style={{ padding: '1em' }}>
               AI Opponent: {difficulty}
             </div>
             <div className="d-flex justify-content-center align-items-center flex-grow-1">
