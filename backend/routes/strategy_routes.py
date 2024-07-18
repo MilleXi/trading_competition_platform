@@ -172,6 +172,12 @@ class ShortStrategy(MyStrategy):
       returns = hist.pct_change().dropna()
       sharpes[symbol] = self.calculate_sharpe_ratio(returns)
 
+      # 计算beta值
+      benchmark_hist = self.data['SPY'][
+        (self.data.index <= current_date) & (self.data.index > current_date - timedelta(days=365))]
+      benchmark_returns = benchmark_hist.pct_change().dropna()
+      betas[symbol] = self.calculate_beta(returns, benchmark_returns)
+
     weights = {}
     selected_symbols = []
     current_date_index = self.data.index.get_loc(current_date)
@@ -200,6 +206,16 @@ class ShortStrategy(MyStrategy):
           if symbol in selected_symbols:
             selected_symbols.remove(symbol)  # Skip buying this stock
 
+    plus_symbols = []
+    if self.is_bull_market(current_date):
+      plus_symbols = [symbol for symbol in self.symbols if betas.get(symbol, 0) > 1]
+    else:
+      plus_symbols = [symbol for symbol in self.symbols if betas.get(symbol, 0) < 0.2]
+    for symbol in plus_symbols:
+      if symbol not in selected_symbols:
+        selected_symbols.append(symbol)
+
+
     # set the weights for selected symbols
     weights = {}
     for symbol, model_predict in self.model_predict.items():
@@ -207,6 +223,10 @@ class ShortStrategy(MyStrategy):
       if not symbol in selected_symbols:
         continue
       weights[symbol] = model_predict_tomorrow
+
+    for symbol in plus_symbols:
+      weights[symbol] = 0.3
+
 
     weight_sum = sum(weights.values())
     weights = {key: value / weight_sum for key, value in weights.items()}
