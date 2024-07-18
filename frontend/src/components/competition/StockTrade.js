@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 
-const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance, userId, selectedStock, handleSubmit }) => {
-  const [balance, setBalance] = useState(initialBalance);
-  const [remainingBalance, setRemainingBalance] = useState(initialBalance);
+const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance, cash, userId, selectedStock, handleSubmit, stockData, userInfo }) => {
+  // const [tempCash, setTempCash] = useState(cash);
   const [gameEnd, setGameEnd] = useState(false);
+  console.log('stockData:', stockData);
 
   useEffect(() => {
     // 初始化默认选择为hold
@@ -39,11 +39,35 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
     setSelectedTrades(clearedTrades);
   };
 
+  const onBuyInput = (e, stock) => {
+    let value = Math.floor(e.target.value);
+    value = Math.max(value, 0);
+    console.log('onBuyInput stockData:', stockData);
+    let _cash = cash;
+    for (let stockOther in stockData) 
+      if (stockOther !== stock)
+        if (selectedTrades[stockOther].type === 'buy')
+          _cash -= stockData[stockOther].open * selectedTrades[stockOther].amount;
+        else if (selectedTrades[stockOther].type === 'sell')
+          _cash += stockData[stockOther].open * selectedTrades[stockOther].amount;
+    console.log('onBuyInput _cash:', _cash);
+    value = Math.min(value, Math.floor(_cash / stockData[stock].open));
+    e.target.value = value;
+    return value;
+  }
+
+  const onSellInput = (e, stock) => {
+    console.log('onSellInput stockData:', userInfo);
+    let value = Math.floor(e.target.value);
+    value = Math.max(value, 0);
+    value = Math.min(value, userInfo['stocks'][stock]);
+    e.target.value = value;
+    return value;
+  }
+
   return (
     <div className="decision-area">
-      <div>Initial Investment: {balance}</div>
-      <div>Balance: {remainingBalance}</div>
-
+      <div>Initial Investment: {initialBalance} &emsp; Cash: {cash}</div>
       <div className="stock-container">
         {selectedStock.map((stock) => (
           <div key={stock} className="stock-item" style={{ flex: '1' }}>
@@ -66,7 +90,7 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
                     style={{ minWidth: '0', width: '90%' }}
                     min={0}
                     step={1}
-                    onInput={(e) => e.target.value = Math.floor(e.target.value)}
+                    onInput={(e) => onBuyInput(e, stock)}
                   />
                 )}
               </div>
@@ -87,7 +111,7 @@ const StockTradeComponent = ({ selectedTrades, setSelectedTrades, initialBalance
                     style={{ minWidth: '0', width: '90%' }}
                     min={0}
                     step={1}
-                    onInput={(e) => e.target.value = Math.floor(e.target.value)}
+                    onInput={(e) => onSellInput(e, stock)}
                   />
                 )}
               </div>

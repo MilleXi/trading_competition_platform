@@ -40,6 +40,8 @@ def get_game_info():
         }
         for game_info in game_infos
     ]
+    # 倒序排列
+    game_info_list.sort(key=lambda x: x['last_updated'], reverse=True)
     return jsonify(game_info_list)
 
 
