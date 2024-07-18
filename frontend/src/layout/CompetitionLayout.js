@@ -47,7 +47,7 @@ const CompetitionLayout = () => {
   const [aiPortfolioValue, setAiPortfolioValue] = useState(0);
   const [aiTotalAssets, setAiTotalAssets] = useState(initialBalance);
   const TMinus = 60;
-  const MaxRound = 20;
+  const MaxRound = 10;
   const [counter, setCounter] = useState(TMinus);
   const [gameEnd, setGameEnd] = useState(false);
   const [refreshHistory, setRefreshHistory] = useState(false);
@@ -650,30 +650,6 @@ const CompetitionLayout = () => {
                     <div style={{ marginRight: '4px' }}>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
                   </div>
                 </div>
-                {/* <div className="ranking">
-                  <h3>Standings:</h3>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Rank</th>
-                        <th>Competitor</th>
-                        <th>Income</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>1</td>
-                        <td>AI</td>
-                        <td>+2000</td>
-                      </tr>
-                      <tr>
-                        <td>2</td>
-                        <td>YOU</td>
-                        <td>-2000</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div> */}
                 <Standings initialBalance={initialBalance} totalAssets={totalAssets} aiTotalAssets={aiTotalAssets} />
               </div>
             </div>
@@ -755,7 +731,12 @@ const CompetitionLayout = () => {
         onRequestClose={closeStrategyModal}
         contentLabel="Strategy Modal"
         style={{
-          content: {
+            overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(5px)',
+            zIndex: '1000'
+            },
+            content: {
             top: '50%',
             left: '50%',
             right: 'auto',
@@ -763,34 +744,57 @@ const CompetitionLayout = () => {
             marginRight: '-50%',
             transform: 'translate(-50%, -50%)',
             width: '80%',
+            maxWidth: '600px',
             height: 'auto',
-            zIndex: '1000',
-            color: 'black',
-          }
+            padding: '20px',
+            borderRadius: '10px',
+            border: 'none',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+            backgroundColor: '#fff',
+            color: '#333',
+            textAlign: 'center' // 新增的样式
+            }
         }}
-      >
-        <h2>Strategy for {currentDate.toISOString().split('T')[0]}</h2>
-        <div>
-          <h3>Player's Strategy:</h3>
-          {Object.entries(selectedTrades).map(([stock, trade]) => (
-            <div key={stock}>
-              <p>{stock}: {trade.type} {trade.amount}</p>
+        >
+        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
+            Strategy for {currentDate.toISOString().split('T')[0]}
+        </h2>
+        <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ marginBottom: '10px', color: '#444' }}>Player's Strategy:</h3>
+            {Object.entries(selectedTrades).map(([stock, trade]) => (
+            <div key={stock} style={{ marginBottom: '10px' }}>
+                <p>{stock}: {trade.type} {trade.amount}</p>
             </div>
-          ))}
+            ))}
         </div>
-        <div>
-          <h3>AI's Strategy:</h3>
-          {aiStrategy && aiStrategy.change ? (
+        <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ marginBottom: '10px', color: '#444' }}>AI's Strategy:</h3>
+            {aiStrategy && aiStrategy.change ? (
             Object.entries(aiStrategy.change).map(([stock, change]) => (
-              <div key={stock}>
+                <div key={stock} style={{ marginBottom: '10px' }}>
                 <p>{stock}: {change}</p>
-              </div>
+                </div>
             ))
-          ) : (
+            ) : (
             <p>No AI strategy found</p>
-          )}
+            )}
         </div>
-        <Button onClick={closeStrategyModal} style={{ display: 'block', margin: '20px auto' }} variant='outlined'>Close</Button>
+        <Button
+            onClick={closeStrategyModal}
+            style={{
+            display: 'block',
+            margin: '0 auto',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '5px',
+            backgroundColor: '#007bff',
+            color: '#fff',
+            cursor: 'pointer'
+            }}
+            variant='outlined'
+        >
+            Close
+        </Button>
       </Modal>
       {/* Game End Modal */}
       <GameEndModal

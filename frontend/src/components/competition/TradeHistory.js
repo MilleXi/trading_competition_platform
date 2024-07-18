@@ -69,7 +69,7 @@ const TradeHistory = ({ userId, refreshHistory, selectedStock, gameId }) => {
   );
 
   return (
-    <div className="history-section">
+    <div>
       <h4>Trade History</h4>
       <div className="trade-history">
         <div className="history-header">
