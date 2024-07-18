@@ -70,6 +70,16 @@ We welcome any form of contribution! If you have new ideas, find bugs, or have c
 
 This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
+## Acknowledgements
+
+I would like to extend my heartfelt gratitude to my amazing teammates who have contributed significantly to this project. Working together has been an incredibly rewarding and enjoyable experience. Please feel free to follow them on GitHub to see their great work:
+
+- [@Rigel-Alpha](https://github.com/Rigel-Alpha)
+- [@yali-hzy](https://github.com/yali-hzy)
+- [@Caromiobenn](https://github.com/Caromiobenn)
+
+Their dedication and hard work have been instrumental in bringing this project to life. Thank you for your outstanding contributions and collaboration!
+
 ## Contact Us
 
 If you have any questions or suggestions, please feel free to contact us:
