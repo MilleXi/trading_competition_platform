@@ -96,7 +96,7 @@
 
 .decision-area {
   padding: 20px;
-  width: 48%;
+  width: 900px;
 }
 
 .stock-container {
@@ -104,6 +104,9 @@
   justify-content: space-between;
   flex-wrap: wrap;
   width: 100%;
+  height: 220px;
+  margin-top: 20px;
+  
 }
 
 .stock-item {
@@ -114,6 +117,7 @@
   border: 1px solid #ccc;
   padding: 10px;
   border-radius: 5px;
+  font-size: 22px;
 }
 
 .stock-name {
@@ -149,11 +153,12 @@
 }
 
 .ranking {
-  width: 48%;
+  width: 850px;
   padding: 10px;
   background-color: var(--frame-color);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
+  font-size: 20px;
 }
 
 .ranking table {
@@ -162,7 +167,7 @@
 
 .history-section {
   width: 100%;
-  margin-top: 20px;
+  
 }
 
 .history-section select {
