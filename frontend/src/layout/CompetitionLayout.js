@@ -28,7 +28,7 @@ const CompetitionLayout = () => {
   const startDate = new Date('2023-01-03');
   const gameIdRef = useRef(uuidv4());
   const gameId = gameIdRef.current;
-  const modelList = ['LSTM'];
+  const [modelList, setModelList] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [currentDate, setCurrentDate] = useState(startDate);
   const [selectedStock, setSelectedStock] = useState('AAPL');
@@ -53,17 +53,23 @@ const CompetitionLayout = () => {
   const userId = 1;
   const [CandlestickChartData, setCandlestickChartData] = useState([]);
   const location = useLocation();
-  const { difficulty } = location.state || { difficulty: 'Easy' };
+  const { difficulty } = location.state || { difficulty: 'LSTM' };
   const rootElement = document.getElementById('root');
   const [aiStrategy, setAiStrategy] = useState({});
   const [showStrategyModal, setShowStrategyModal] = useState(false);
   const [stopCounter, setStopCounter] = useState(false);
   const [showPointsStore, setShowPointsStore] = useState(false);
+  const [stockInfo, setStockInfo] = useState({});
+  const [userInfo, setUserInfo] = useState({});
 
   const handleClosePointsStore = () => setShowPointsStore(false);
   const handleShowPointsStore = () => setShowPointsStore(true);
 
   Modal.setAppElement(rootElement);
+
+  useEffect(() => {
+    setModelList([difficulty]);
+  }, [difficulty]);
 
   useEffect(() => {
     const fetchStockData = async () => {
@@ -104,9 +110,10 @@ const CompetitionLayout = () => {
           cash: initialBalance,
           portfolio_value: 0,
           total_assets: initialBalance,
-          stocks: {},
+          stocks: selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: 0 }), {}),
           score: 0
         };
+        setUserInfo(initialData);
         const aiData = {
           game_id: gameId,
           user_id: 'ai',
@@ -139,6 +146,8 @@ const CompetitionLayout = () => {
     };
 
     initializeGameInfo();
+    fetchStockInfo();
+    console.log('initialize');
   }, []);
 
   useEffect(() => {
@@ -200,7 +209,7 @@ const CompetitionLayout = () => {
       for (const record of response.data.trade_log) {
         const logEntry = {
           ...record,
-          model: "LSTM",
+          model: modelList[0],
           game_id: gameId
         };
         await axios.post('http://localhost:8000/api/save_trade_log', logEntry);
@@ -225,148 +234,140 @@ const CompetitionLayout = () => {
     const aiInfo = await fetchAiInfo();
 
     try {
-        const aiResponse = await axios.get('http://localhost:8000/api/get_trade_log', {
-            params: {
-                game_id: gameId,
-                model: 'LSTM',
-                date: date,
-            }
-        });
-
-        if (aiResponse.data) {
-            console.log("AI Strategy:", aiResponse.data);
-
-            // 直接使用从后端获取的ai策略数据
-            const strategy = aiResponse.data.change || {};
-            for (const [stock, amount] of Object.entries(strategy)) {
-                const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
-                    params: {
-                        symbol: stock,
-                        start_date: date,
-                        end_date: date
-                    }
-                });
-                const filteredData = response.data;
-
-                if (filteredData.length === 0) {
-                    console.error(`Stock info for ${stock} on ${date} not found`);
-                    continue;
-                }
-
-                const stockInfo = filteredData[0];
-                console.log("AI stockInfo:", stockInfo);
-
-                const aiTransaction = {
-                    game_id: gameId,
-                    user_id: 'ai',
-                    stock_symbol: stock,
-                    transaction_type: amount > 0 ? 'buy' : 'sell',
-                    amount: Math.abs(amount),
-                    price: stockInfo.open,
-                    date: currentDate.toISOString()
-                };
-
-                await saveTransaction(aiTransaction);
-
-                if (amount > 0) {
-                    aiInfo.cash -= stockInfo.open * amount;
-                    aiInfo.stocks[stock] = (aiInfo.stocks[stock] || 0) + amount;
-                } else {
-                    aiInfo.cash += stockInfo.open * Math.abs(amount);
-                    aiInfo.stocks[stock] = (aiInfo.stocks[stock] || 0) - Math.abs(amount);
-                }
-            }
-
-            const aiPortfolioValue = await selectedStockList.reduce(async (accPromise, stock) => {
-                const acc = await accPromise;
-                const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
-                    params: {
-                        symbol: stock,
-                        start_date: date,
-                        end_date: date
-                    }
-                });
-                const filteredData = response.data;
-
-                if (filteredData.length === 0) {
-                    console.error(`Stock info for ${stock} on ${date} not found`);
-                    return acc;
-                }
-
-                const stockInfo = filteredData[0];
-                return acc + (aiInfo.stocks[stock] || 0) * stockInfo.close;
-            }, Promise.resolve(0));
-
-            aiInfo.portfolio_value = aiPortfolioValue;
-            aiInfo.total_assets = aiInfo.cash + aiInfo.portfolio_value;
-
-            try {
-                await axios.post('http://localhost:8000/api/game_info', aiInfo);
-            } catch (error) {
-                console.error('Error updating AI info:', error);
-            }
-
-            setAiStrategy(aiResponse.data); // 更新状态以触发其他依赖此状态的UI变化
-            setShowStrategyModal(true);
-
-            // 更新AI的状态
-            setAiCash(aiInfo.cash);
-            setAiPortfolioValue(aiInfo.portfolio_value);
-            setAiTotalAssets(aiInfo.total_assets);
-        } else {
-            console.error('No AI strategy found');
-        }
-    } catch (error) {
-        console.error('Error fetching AI strategy:', error);
-    }
-};
-
-
-  const handleSubmit = async () => {
-    console.log('handleSubmit:');
-    const date = currentDate.toISOString().split('T')[0]; // 确保date是一个字符串
-
-    const userInfo = await fetchUserInfo();
-
-    for (const stock of Object.keys(selectedTrades)) {
-      const { type, amount } = selectedTrades[stock];
-      const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
+      const aiResponse = await axios.get('http://localhost:8000/api/get_trade_log', {
         params: {
-          symbol: stock,
-          start_date: date,
-          end_date: date
+          game_id: gameId,
+          model: 'LSTM',
+          date: date,
         }
       });
-      const filteredData = response.data;
 
-      if (filteredData.length === 0) {
-        console.error(`Stock info for ${stock} on ${date} not found`);
-        continue;
+      if (aiResponse.data) {
+        console.log("AI Strategy:", aiResponse.data);
+
+        // 直接使用从后端获取的ai策略数据
+        const strategy = aiResponse.data.change || {};
+        for (const [stock, amount] of Object.entries(strategy)) {
+          const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
+            params: {
+              symbol: stock,
+              start_date: date,
+              end_date: date
+            }
+          });
+          const filteredData = response.data;
+
+          if (filteredData.length === 0) {
+            console.error(`Stock info for ${stock} on ${date} not found`);
+            continue;
+          }
+
+          const stockInfo = filteredData[0];
+          console.log("AI stockInfo:", stockInfo);
+
+          const aiTransaction = {
+            game_id: gameId,
+            user_id: 'ai',
+            stock_symbol: stock,
+            transaction_type: amount > 0 ? 'buy' : 'sell',
+            amount: Math.abs(amount),
+            price: stockInfo.open,
+            date: currentDate.toISOString()
+          };
+
+          await saveTransaction(aiTransaction);
+
+          if (amount > 0) {
+            aiInfo.cash -= stockInfo.open * amount;
+            aiInfo.stocks[stock] = (aiInfo.stocks[stock] || 0) + amount;
+          } else {
+            aiInfo.cash += stockInfo.open * Math.abs(amount);
+            aiInfo.stocks[stock] = (aiInfo.stocks[stock] || 0) - Math.abs(amount);
+          }
+        }
+
+        const aiPortfolioValue = await selectedStockList.reduce(async (accPromise, stock) => {
+          const acc = await accPromise;
+          const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
+            params: {
+              symbol: stock,
+              start_date: date,
+              end_date: date
+            }
+          });
+          const filteredData = response.data;
+
+          if (filteredData.length === 0) {
+            console.error(`Stock info for ${stock} on ${date} not found`);
+            return acc;
+          }
+
+          const stockInfo = filteredData[0];
+          return acc + (aiInfo.stocks[stock] || 0) * stockInfo.close;
+        }, Promise.resolve(0));
+
+        aiInfo.portfolio_value = aiPortfolioValue;
+        aiInfo.total_assets = aiInfo.cash + aiInfo.portfolio_value;
+
+        try {
+          await axios.post('http://localhost:8000/api/game_info', aiInfo);
+        } catch (error) {
+          console.error('Error updating AI info:', error);
+        }
+
+        setAiStrategy(aiResponse.data); // 更新状态以触发其他依赖此状态的UI变化
+        setShowStrategyModal(true);
+
+        // 更新AI的状态
+        setAiCash(aiInfo.cash);
+        setAiPortfolioValue(aiInfo.portfolio_value);
+        setAiTotalAssets(aiInfo.total_assets);
+      } else {
+        console.error('No AI strategy found');
       }
+    } catch (error) {
+      console.error('Error fetching AI strategy:', error);
+    }
+  };
+  const fetchStockInfo = async () => {
+    const date = currentDate.toISOString().split('T')[0]; // 确保date是一个字符串
+    let userInfo2 = await fetchUserInfo();
+    console.log("fetchStockInfo userInfo2:", userInfo2);
 
-      const stockInfo = filteredData[0];
-      console.log("symbol:", stock);
-      console.log("StockInfo:", stockInfo);
+    if (!userInfo2) {
+      userInfo2 = userInfo
+      console.log("fetchUserinfo failed");
+      return;
+    }
 
-      const transaction = {
-        game_id: gameId,
-        user_id: userId,
-        stock_symbol: stock,
-        transaction_type: type,
-        amount: parseFloat(amount),
-        price: stockInfo.open,
-        date: currentDate.toISOString()
-      };
+    const newStockInfo = {};
 
-      await saveTransaction(transaction);
+    for (const stock of Object.keys(selectedTrades)) {
+      console.log("useEffect stock:", stock);
+      try {
+        const response = await axios.get('http://localhost:8000/api/stored_stock_data', {
+          params: {
+            symbol: stock,
+            start_date: date,
+            end_date: date
+          }
+        });
 
-      if (type === 'buy') {
-        userInfo.cash -= stockInfo.open * amount;
-        userInfo.stocks[stock] = (userInfo.stocks[stock] || 0) + parseFloat(amount);
-      } else if (type === 'sell') {
-        userInfo.cash += stockInfo.open * amount;
-        userInfo.stocks[stock] = (userInfo.stocks[stock] || 0) - parseFloat(amount);
+        if (response.data && response.data[0]) {
+          newStockInfo[stock] = response.data[0];
+        } else {
+          console.error(`Stock info for ${stock} on ${date} not found`);
+        }
+      } catch (error) {
+        console.error(`Error fetching stock data for ${stock}:`, error);
       }
+    }
+
+    setStockInfo(newStockInfo);
+    console.log("fetchStockInfo stockInfo:", newStockInfo);
+
+    if (!userInfo2.stocks) {
+      userInfo2.stocks = selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: 0 }), {});
     }
 
     const portfolioValue = await selectedStockList.reduce(async (accPromise, stock) => {
@@ -389,20 +390,59 @@ const CompetitionLayout = () => {
 
       const stockInfo = filteredData[0];
       console.log("stockInfo:", stockInfo);
-      return acc + (userInfo.stocks[stock] || 0) * stockInfo.close;
+      return acc + (userInfo2.stocks[stock] || 0) * stockInfo.close;
     }, Promise.resolve(0));
 
-    userInfo.portfolio_value = portfolioValue;
-    userInfo.total_assets = userInfo.cash + userInfo.portfolio_value;
+    userInfo2.portfolio_value = portfolioValue;
+    userInfo2.total_assets = userInfo2.cash + userInfo2.portfolio_value;
 
     // 更新前端显示的余额值
-    setCash(userInfo.cash);
-    setPortfolioValue(userInfo.portfolio_value);
-    setTotalAssets(userInfo.total_assets);
+    setCash(userInfo2.cash);
+    setPortfolioValue(userInfo2.portfolio_value);
+    setTotalAssets(userInfo2.total_assets);
+    setUserInfo(userInfo2);
+    console.log('userinfo:', userInfo2);
+
+    console.log("fetchStockInfo userInfo:", userInfo2);
+  };
+
+  useEffect(() => {
+    console.log("useEffect currentDate:", currentDate);
+    fetchStockInfo();
+  }, [currentDate, selectedTrades]);
+
+
+
+  const handleSubmit = async () => {
+    console.log('handleSubmit:');
+    const userInfo2 = await fetchUserInfo();
+    for (const [stock, { type, amount }] of Object.entries(selectedTrades)) {
+      const transaction = {
+        game_id: gameId,
+        user_id: userId,
+        stock_symbol: stock,
+        transaction_type: type,
+        amount: parseFloat(amount),
+        price: stockInfo[stock].open,
+        date: currentDate.toISOString()
+      };
+
+      await saveTransaction(transaction);
+
+      if (type === 'buy') {
+        userInfo2.cash -= stockInfo[stock].open * amount;
+        userInfo2.stocks[stock] = (userInfo2.stocks[stock] || 0) + parseFloat(amount);
+      } else if (type === 'sell') {
+        userInfo2.cash += stockInfo[stock].open * amount;
+        userInfo2.stocks[stock] = (userInfo2.stocks[stock] || 0) - parseFloat(amount);
+      }
+    }
+
+    console.log('submit userInfo2:', userInfo2);
 
     // 先保存用户的game_info
     try {
-      await axios.post('http://localhost:8000/api/game_info', userInfo);
+      await axios.post('http://localhost:8000/api/game_info', userInfo2);
     } catch (error) {
       console.error('Error updating user info:', error);
     }
@@ -415,12 +455,15 @@ const CompetitionLayout = () => {
 
   const fetchUserInfo = async () => {
     try {
+      console.log("fetchUserInfo gameId:", gameId);
+      console.log("fetchUserInfo userId:", userId);
       const response = await axios.get('http://localhost:8000/api/game_info', {
         params: {
           game_id: gameId,
           user_id: userId
         }
       });
+      console.log("fetchUserInfo response:", response);
       return response.data[0]; // 假设返回的第一个是需要的用户信息
     } catch (error) {
       console.error('Error fetching user info:', error);
@@ -484,7 +527,7 @@ const CompetitionLayout = () => {
           <AppHeader />
           <div className="d-flex justify-content-between align-items-center w-100">
             <div className="d-flex justify-content-start">
-                Mode: {difficulty}
+                AI Opponent: {difficulty}
             </div>
             <div className="d-flex justify-content-center align-items-center flex-grow-1">
                 <span className="mx-3">Current Round: {currentRound}/{MaxRound}</span>
@@ -492,15 +535,15 @@ const CompetitionLayout = () => {
                 <span className="mx-3">Countdown: {counter}</span>
             </div>
             <CDropdown variant="dropdown">
-                <CDropdownToggle caret={true}>
+              <CDropdownToggle caret={true}>
                 <span style={{ color: 'white' }}>Game Credits: 50</span>
-                </CDropdownToggle>
+              </CDropdownToggle>
 
-                <CDropdownMenu className='dropdown-menu'>
+              <CDropdownMenu className='dropdown-menu'>
                 <CDropdownItem className='dropdown-item' onClick={handleShowPointsStore}>
-                    <span style={{ color: 'white' }}>Shop</span>
+                  <span style={{ color: 'white' }}>Shop</span>
                 </CDropdownItem>
-                </CDropdownMenu>
+              </CDropdownMenu>
             </CDropdown>
 
             {/* Points Store Modal */}
@@ -540,13 +583,16 @@ const CompetitionLayout = () => {
             </div>
             <div className="bottom-section d-flex">
             <div className="left-section" style={{ flex: 1, marginRight: '20px' }}>
-                <StockTradeComponent 
-                selectedTrades={selectedTrades} 
+                <StockTradeComponent
+                selectedTrades={selectedTrades}
                 setSelectedTrades={setSelectedTrades}
                 initialBalance={initialBalance}
+                cash={cash}
                 userId={userId}
                 selectedStock={selectedStockList}
-                handleSubmit={handleSubmit} 
+                handleSubmit={handleSubmit}
+                stockData={stockInfo}
+                userInfo={userInfo}
                 />
             </div>
             <div className="right-section" style={{ flex: 1 }}>
@@ -597,10 +643,10 @@ const CompetitionLayout = () => {
           </div>
         </div>
       </div>
-    
+
       <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Select Stocks"
         style={{
-            content: {
+          content: {
             top: '50%',
             left: '50%',
             right: 'auto',
@@ -614,47 +660,47 @@ const CompetitionLayout = () => {
             borderRadius: '10px',
             padding: '20px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            }
+          }
         }}
-        >
-        <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '20px'}}>Please Select 3 Stocks</h2>
+      >
+        <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '20px' }}>Please Select 3 Stocks</h2>
         <Grid container spacing={2}>
-            {tickers.map((ticker) => (
+          {tickers.map((ticker) => (
             <Grid item xs={2} key={ticker}>
-                <FormControlLabel
+              <FormControlLabel
                 control={
-                    <Checkbox
+                  <Checkbox
                     checked={selectedTickers.includes(ticker)}
                     onChange={() => handleTickerSelection(ticker)}
                     name={ticker}
                     color="primary"
-                    />
+                  />
                 }
                 label={
-                    <Typography sx={{ fontSize: '22px', color: 'black' }}>
-                      {ticker}
-                    </Typography>
-                  }
-                />
+                  <Typography sx={{ fontSize: '22px', color: 'black' }}>
+                    {ticker}
+                  </Typography>
+                }
+              />
             </Grid>
-            ))}
+          ))}
         </Grid>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-            <button 
+            <button
             onClick={confirmSelection}
             style={{
-                padding: '10px 20px',
-                backgroundColor: '#008CBA',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                outline: 'none',
-                fontSize: '20px'
+              padding: '10px 20px',
+              backgroundColor: '#008CBA',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              outline: 'none',
+              fontSize: '20px'
             }}
-            >
+          >
             Confirm
-            </button>
+          </button>
         </div>
       </Modal>
 

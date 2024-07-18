@@ -40,6 +40,8 @@ def get_game_info():
         }
         for game_info in game_infos
     ]
+    # 倒序排列
+    game_info_list.sort(key=lambda x: x['last_updated'], reverse=True)
     return jsonify(game_info_list)
 
 
@@ -90,3 +92,26 @@ def next_trading_day():
   next_trading_day = trading_days[trading_days > current_date][n - 1]
 
   return jsonify({"next_trading_day": next_trading_day.strftime('%Y-%m-%d')})
+
+
+@game_bp.route('/last_trading_day', methods=['POST'])
+@cross_origin()
+def last_trading_day():
+  data = request.json
+  current_date = pd.to_datetime(data['current_date'])
+  n = data.get('n', 1)
+
+  # 获取所有交易日数据
+  df = yf.download("SPY", start="2015-01-01", end="2025-12-31")  # 使用SPY代表标准交易日
+  trading_days = df.index
+
+  # 计算上一个交易日
+  previous_trading_days = trading_days[trading_days < current_date]
+
+  # 确保存在足够的历史交易日
+  if len(previous_trading_days) < n:
+    return jsonify({"error": "Not enough trading days in the past"}), 400
+
+  last_trading_day = previous_trading_days[-n]
+
+  return jsonify({"last_trading_day": last_trading_day.strftime('%Y-%m-%d')})
