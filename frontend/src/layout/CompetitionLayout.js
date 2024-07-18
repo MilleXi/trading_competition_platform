@@ -23,6 +23,7 @@ import FormLabel from '@mui/material/FormLabel';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
+
 const CompetitionLayout = () => {
   const initialBalance = 100000;
   const startDate = new Date('2023-01-03');
@@ -329,15 +330,15 @@ const CompetitionLayout = () => {
     const date = currentDate.toISOString().split('T')[0]; // 确保date是一个字符串
     let userInfo2 = await fetchUserInfo();
     console.log("fetchStockInfo userInfo2:", userInfo2);
-  
+
     if (!userInfo2) {
       userInfo2 = userInfo
       console.log("fetchUserinfo failed");
       return;
     }
-  
+
     const newStockInfo = {};
-  
+
     for (const stock of Object.keys(selectedTrades)) {
       console.log("useEffect stock:", stock);
       try {
@@ -348,7 +349,7 @@ const CompetitionLayout = () => {
             end_date: date
           }
         });
-  
+
         if (response.data && response.data[0]) {
           newStockInfo[stock] = response.data[0];
         } else {
@@ -358,14 +359,14 @@ const CompetitionLayout = () => {
         console.error(`Error fetching stock data for ${stock}:`, error);
       }
     }
-  
+
     setStockInfo(newStockInfo);
     console.log("fetchStockInfo stockInfo:", newStockInfo);
-  
+
     if (!userInfo2.stocks) {
       userInfo2.stocks = selectedStockList.reduce((acc, stock) => ({ ...acc, [stock]: 0 }), {});
     }
-  
+
     const portfolioValue = await selectedStockList.reduce(async (accPromise, stock) => {
       const acc = await accPromise;
       console.log("stock", stock);
@@ -378,35 +379,35 @@ const CompetitionLayout = () => {
         }
       });
       const filteredData = response.data;
-  
+
       if (filteredData.length === 0) {
         console.error(`Stock info for ${stock} on ${date} not found`);
         return acc;
       }
-  
+
       const stockInfo = filteredData[0];
       console.log("stockInfo:", stockInfo);
       return acc + (userInfo2.stocks[stock] || 0) * stockInfo.close;
     }, Promise.resolve(0));
-  
+
     userInfo2.portfolio_value = portfolioValue;
     userInfo2.total_assets = userInfo2.cash + userInfo2.portfolio_value;
-  
+
     // 更新前端显示的余额值
     setCash(userInfo2.cash);
     setPortfolioValue(userInfo2.portfolio_value);
     setTotalAssets(userInfo2.total_assets);
     setUserInfo(userInfo2);
     console.log('userinfo:', userInfo2);
-  
+
     console.log("fetchStockInfo userInfo:", userInfo2);
   };
-  
+
   useEffect(() => {
     console.log("useEffect currentDate:", currentDate);
     fetchStockInfo();
   }, [currentDate, selectedTrades]);
-  
+
 
 
   const handleSubmit = async () => {
@@ -435,7 +436,7 @@ const CompetitionLayout = () => {
     }
 
     console.log('submit userInfo2:', userInfo2);
-    
+
     // 先保存用户的game_info
     try {
       await axios.post('http://localhost:8000/api/game_info', userInfo2);
@@ -523,12 +524,12 @@ const CompetitionLayout = () => {
           <AppHeader />
           <div className="d-flex justify-content-between align-items-center w-100">
             <div className="d-flex justify-content-start">
-                Mode: {difficulty}
+              Mode: {difficulty}
             </div>
             <div className="d-flex justify-content-center align-items-center flex-grow-1">
-                <span className="mx-3">Current Round: {currentRound}/{MaxRound}</span>
-                <span className="mx-3">Current Date: {currentDate.toISOString().split('T')[0]}</span>
-                <span className="mx-3">Countdown: {counter}</span>
+              <span className="mx-3">Current Round: {currentRound}/{MaxRound}</span>
+              <span className="mx-3">Current Date: {currentDate.toISOString().split('T')[0]}</span>
+              <span className="mx-3">Countdown: {counter}</span>
             </div>
             <CDropdown variant="dropdown">
               <CDropdownToggle caret={true}>
@@ -578,57 +579,57 @@ const CompetitionLayout = () => {
               </div>
             </div>
             <div className="bottom-section d-flex">
-            <div className="left-section" style={{ flex: 1, marginRight: '20px' }}>
-                <StockTradeComponent 
-                selectedTrades={selectedTrades} 
-                setSelectedTrades={setSelectedTrades}
-                initialBalance={initialBalance}
-                cash={cash}
-                userId={userId}
-                selectedStock={selectedStockList}
-                handleSubmit={handleSubmit} 
-                stockData={stockInfo}
-                userInfo={userInfo}
+              <div className="left-section" style={{ flex: 1, marginRight: '20px' }}>
+                <StockTradeComponent
+                  selectedTrades={selectedTrades}
+                  setSelectedTrades={setSelectedTrades}
+                  initialBalance={initialBalance}
+                  cash={cash}
+                  userId={userId}
+                  selectedStock={selectedStockList}
+                  handleSubmit={handleSubmit}
+                  stockData={stockInfo}
+                  userInfo={userInfo}
                 />
-            </div>
-            <div className="right-section" style={{ flex: 1 }}>
+              </div>
+              <div className="right-section" style={{ flex: 1 }}>
                 <div className="financials mb-3">
-                <div className="d-flex justify-content-between align-items-center w-100 mb-3">
-                    <div style={{ marginTop:'21px', marginRight:'4px'}}>Cash: ${cash.toFixed(2)}</div>
-                    <div style={{ marginTop:'21px', marginRight:'4px'}}>Portfolio Value: ${portfolioValue.toFixed(2)}</div>
-                    <div style={{ marginTop:'21px', marginRight:'4px'}}>Total Assets: ${totalAssets.toFixed(2)}</div>
-                </div>
-                <div className="d-flex justify-content-between align-items-center w-100 mb-3">
-                    <div style={{ marginRight:'4px'}}>AI Cash: ${aiCash.toFixed(2)}</div>
-                    <div style={{ marginRight:'4px'}}>AI Portfolio Value: ${aiPortfolioValue.toFixed(2)}</div>
-                    <div style={{ marginRight:'4px'}}>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
-                </div>
+                  <div className="d-flex justify-content-between align-items-center w-100 mb-3">
+                    <div style={{ marginTop: '21px', marginRight: '4px' }}>Cash: ${cash.toFixed(2)}</div>
+                    <div style={{ marginTop: '21px', marginRight: '4px' }}>Portfolio Value: ${portfolioValue.toFixed(2)}</div>
+                    <div style={{ marginTop: '21px', marginRight: '4px' }}>Total Assets: ${totalAssets.toFixed(2)}</div>
+                  </div>
+                  <div className="d-flex justify-content-between align-items-center w-100 mb-3">
+                    <div style={{ marginRight: '4px' }}>AI Cash: ${aiCash.toFixed(2)}</div>
+                    <div style={{ marginRight: '4px' }}>AI Portfolio Value: ${aiPortfolioValue.toFixed(2)}</div>
+                    <div style={{ marginRight: '4px' }}>AI Total Assets: ${aiTotalAssets.toFixed(2)}</div>
+                  </div>
                 </div>
                 <div className="ranking">
-                <h3>Standings:</h3>
-                <table className="table">
+                  <h3>Standings:</h3>
+                  <table className="table">
                     <thead>
-                    <tr>
+                      <tr>
                         <th>Rank</th>
                         <th>Competitor</th>
                         <th>Income</th>
-                    </tr>
+                      </tr>
                     </thead>
                     <tbody>
-                    <tr>
+                      <tr>
                         <td>1</td>
                         <td>AI</td>
                         <td>+2000</td>
-                    </tr>
-                    <tr>
+                      </tr>
+                      <tr>
                         <td>2</td>
                         <td>YOU</td>
                         <td>-2000</td>
-                    </tr>
+                      </tr>
                     </tbody>
-                </table>
+                  </table>
                 </div>
-            </div>
+              </div>
             </div>
 
 
@@ -682,7 +683,7 @@ const CompetitionLayout = () => {
           ))}
         </Grid>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-            <button
+          <button
             onClick={confirmSelection}
             style={{
               padding: '10px 20px',
