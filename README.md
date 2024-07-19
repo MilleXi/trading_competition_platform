@@ -17,6 +17,12 @@ Welcome to Trading Wars, an innovative and engaging platform where artificial in
 - **Trade History**: Log of all trades made by both the player and the AI.
 - **Points System**: Earn or lose points based on performance, which can be used to purchase in-game items.
 
+## Game Guide Vedio
+
+Watch the demo video below to see how to play the game:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Game Tips
 
 - Diversify your portfolio to spread risk.
