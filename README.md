@@ -21,7 +21,7 @@ Welcome to Trading Wars, an innovative and engaging platform where artificial in
 
 Watch the demo video below to see how to play the game:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[Watch the video](https://youtu.be/E7QLd853hZ0)
 
 ## Game Tips
 
