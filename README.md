@@ -80,7 +80,7 @@ This project is open-sourced under the MIT License. For details, please see the 
 
 I would like to extend my heartfelt gratitude to my amazing teammates who have contributed significantly to this project. Working together has been an incredibly rewarding and enjoyable experience. Please feel free to follow them on GitHub to see their great work:
 
-- [@Rigel-Alpha](https://github.com/Rigel-Alpha)
+- [@Rigel-Alpha](https://github.com/Rigel-Alpha)😇
 - [@yali-hzy](https://github.com/yali-hzy)
 - [@Caromiobenn](https://github.com/Caromiobenn)
 
