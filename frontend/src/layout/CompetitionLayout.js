@@ -60,7 +60,7 @@ const CompetitionLayout = () => {
   const rootElement = document.getElementById('root');
   const [aiStrategy, setAiStrategy] = useState({});
   const [showStrategyModal, setShowStrategyModal] = useState(false);
-  const [stopCounter, setStopCounter] = useState(false);
+  const [stopCounter, setStopCounter] = useState(true);
   const [showPointsStore, setShowPointsStore] = useState(false);
   const [stockInfo, setStockInfo] = useState({});
   const [userInfo, setUserInfo] = useState({});
@@ -189,7 +189,7 @@ const CompetitionLayout = () => {
       }
     }, 1000);
     return () => clearTimeout(timerId);
-  }, [counter, gameEnd]);
+  }, [counter, gameEnd, stopCounter]);
 
   const tickers = [
     'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'JPM', 'BAC', 'C', 'WFC', 'GS',
@@ -221,6 +221,7 @@ const CompetitionLayout = () => {
     if (selectedTickers.length === 3) {
       setSelectedStockList(selectedTickers);
       setSelectedStock(selectedTickers[0]); // 默认选择第一个股票
+      setStopCounter(false);
       closeModal();
     } else
       return;
