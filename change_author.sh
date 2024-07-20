@@ -2,7 +2,7 @@
 
 git filter-branch --env-filter '
 
-OLD_EMAIL="lzr@r-248-97-25-172.comp.nus.edu.sg"
+OLD_EMAIL="lzr@r-110-111-25-172.comp.nus.edu.sg"
 CORRECT_NAME="Rigel-Alpha"
 CORRECT_EMAIL="1004586949@qq.com"
 
