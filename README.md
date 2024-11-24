@@ -76,6 +76,8 @@ We welcome any form of contribution! If you have new ideas, find bugs, or have c
 
 This project is open-sourced under the MIT License. For details, please see the LICENSE file.
 
+This project contains a modified version of [coreui-free-react-admin-template](https://github.com/coreui/coreui-free-react-admin-template) ([MIT License](https://github.com/coreui/coreui-free-react-admin-template/blob/main/LICENSE)) - Copyright (c) 2024 creativeLabs Łukasz Holeczek.
+
 ## Acknowledgements
 
 I would like to extend my heartfelt gratitude to my amazing teammates who have contributed significantly to this project. Working together has been an incredibly rewarding and enjoyable experience. Please feel free to follow them on GitHub to see their great work:
